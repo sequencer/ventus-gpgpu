@@ -20,6 +20,7 @@ public:
     uint32_t getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size);
     void readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, uint64_t *buffer_size);
     void writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size);
+    void activate_warp(int warp_id);
 
     // fetch
     void INIT_INS();
@@ -83,10 +84,10 @@ public:
     // initialize
     void start_of_simulation()
     {
-        for (auto &warp_ : WARPS)
+        for (auto warp_ : WARPS)
         {
-            warp_.pc = -1;
-            warp_.ibuftop_ins = I_TYPE(INVALID_, 0, 0, 0);
+            warp_->pc = -1;
+            warp_->ibuftop_ins = I_TYPE(INVALID_, 0, 0, 0);
         }
         issue_ins = I_TYPE(INVALID_, 0, 0, 0);
     }
@@ -184,7 +185,15 @@ public:
     std::map<OP_TYPE, decodedat> decode_table;
     std::vector<instable_t> instable_vec;
     /*** SIMT frontend ***/
-    std::array<WARP_BONE, num_warp> WARPS;
+    std::array<WARP_BONE*, num_warp> WARPS;
+    std::unordered_map<int, sc_core::sc_process_handle> PROGRAM_COUNTER_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> INSTRUCTION_REG_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> DECODE_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> IBUF_ACTION_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> JUDGE_DISPATCH_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> UPDATE_SCORE_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> INIT_REG_threads;
+    std::unordered_map<int, sc_core::sc_process_handle> WRITE_REG_threads;
 
     /*** SIMD backend ***/
     // issue

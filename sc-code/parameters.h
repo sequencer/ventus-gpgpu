@@ -1573,6 +1573,8 @@ struct sfu_out_t
 class WARP_BONE
 {
 public:
+    int warp_id;
+
     WARP_BONE()
     {
         current_mask.write(~sc_bv<num_thread>());

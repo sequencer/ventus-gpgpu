@@ -132,17 +132,20 @@ void CTA_Scheduler::activate_warp()
         int warp_counter = 0;
         while (warp_counter < mtd.wg_size)
         {
+            sm_group[i]->WARPS[warp_counter] = new WARP_BONE;
+            WARP_BONE* neo_warp = new WARP_BONE;
+            
             cout << "CTA: SM" << i << " warp" << warp_counter << " is activated\n";
-            sm_group[i]->WARPS[warp_counter].is_warp_activated = true;
-            sm_group[i]->WARPS[warp_counter].CSR_reg[1] = mtd.wg_size;
-            sm_group[i]->WARPS[warp_counter].CSR_reg[2] = num_thread;
+            sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[1] = mtd.wg_size;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[2] = num_thread;
 
-            sm_group[i]->WARPS[warp_counter].CSR_reg[4] = 0;
-            sm_group[i]->WARPS[warp_counter].CSR_reg[5] = warp_counter;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[4] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[5] = warp_counter;
 
-            sm_group[i]->WARPS[warp_counter].CSR_reg[8] = 0;
-            sm_group[i]->WARPS[warp_counter].CSR_reg[9] = 0;
-            sm_group[i]->WARPS[warp_counter].CSR_reg[10] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[8] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[9] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[10] = 0;
             ++warp_counter;
         }
         sm_group[i]->num_warp_activated = warp_counter;

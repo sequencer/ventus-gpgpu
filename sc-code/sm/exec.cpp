@@ -40,8 +40,8 @@ void BASE::SALU_IN()
                     ev_salufifo_pushed.notify();
                     for (auto &warp_ : WARPS)
                     {
-                        warp_.jump = false;
-                        warp_.branch_sig = false;
+                        warp_->jump = false;
+                        warp_->branch_sig = false;
                     }
                 }
                 if (b_delay == 0)
@@ -63,10 +63,10 @@ void BASE::SALU_IN()
             if (!salueqa_triggered)
             {
                 ev_salufifo_pushed.notify();
-                for (auto &warp_ : WARPS)
+                for (auto warp_ : WARPS)
                 {
-                    warp_.jump = false;
-                    warp_.branch_sig = false;
+                    warp_->jump = false;
+                    warp_->branch_sig = false;
                 }
             }
             if (!salueqb_triggered)
@@ -91,10 +91,10 @@ void BASE::SALU_CALC()
             wait(SC_ZERO_TIME);
             salueqa_triggered = false;
         }
-        for (auto &warp_ : WARPS)
+        for (auto warp_ : WARPS)
         {
-            warp_.jump = false;
-            warp_.branch_sig = false;
+            warp_->jump = false;
+            warp_->branch_sig = false;
         }
         salutmp1 = salu_dq.front();
         // cout << "salu_dq.front's ins is " << salutmp1.ins << ", data is " << salutmp1.rss1_data << "," << salutmp1.rss2_data << "\n";
@@ -107,15 +107,15 @@ void BASE::SALU_CALC()
             switch (salutmp1.ins.ddd.alu_fn)
             {
                 // case JAL_:
-                //     WARPS[salutmp1.warp_id].branch_sig = true;
-                //     WARPS[salutmp1.warp_id].jump = 1;
-                //     WARPS[salutmp1.warp_id].jump_addr = salutmp1.ins.currentpc + 4 + salutmp1.ins.s2;
+                //     WARPS[salutmp1.warp_id]->branch_sig = true;
+                //     WARPS[salutmp1.warp_id]->jump = 1;
+                //     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.ins.currentpc + 4 + salutmp1.ins.s2;
                 //     salutmp2.data = salutmp1.ins.currentpc + 4;
                 //     break;
                 // case JALR_:
-                //     WARPS[salutmp1.warp_id].branch_sig = true;
-                //     WARPS[salutmp1.warp_id].jump = 1;
-                //     WARPS[salutmp1.warp_id].jump_addr = (salutmp1.rss1_data + salutmp1.ins.s2) & (~1);
+                //     WARPS[salutmp1.warp_id]->branch_sig = true;
+                //     WARPS[salutmp1.warp_id]->jump = 1;
+                //     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss1_data + salutmp1.ins.s2) & (~1);
                 //     salutmp2.data = salutmp1.ins.currentpc + 4;
                 //     break;
 
@@ -129,15 +129,15 @@ void BASE::SALU_CALC()
                 salutmp2.data = salutmp1.rss1_data + salutmp1.rss2_data;
                 if (salutmp1.ins.ddd.branch == DecodeParams::B_J) // jal
                 {
-                    WARPS[salutmp1.warp_id].branch_sig = true;
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->branch_sig = true;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::B_R) // jalr
                 {
-                    WARPS[salutmp1.warp_id].branch_sig = true;
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
+                    WARPS[salutmp1.warp_id]->branch_sig = true;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
                 }
                 break;
 
@@ -255,58 +255,58 @@ void BASE::SALU_CALC()
             {
             // case BEQ_:
             case DecodeParams::FN_SEQ:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (salutmp1.rss1_data == salutmp1.rss2_data)
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
 
             // case BGE_:
             case DecodeParams::FN_SGE:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (salutmp1.rss1_data >= salutmp1.rss2_data)
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
             // case BGEU_:
             case DecodeParams::FN_SGEU:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (static_cast<unsigned int>(salutmp1.rss1_data) >= static_cast<unsigned int>(salutmp1.rss2_data))
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
             // case BLT_:
             case DecodeParams::FN_SLT:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (salutmp1.rss1_data < salutmp1.rss2_data)
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
             // case BLTU_:
             case DecodeParams::FN_SLTU:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (static_cast<unsigned int>(salutmp1.rss1_data) < static_cast<unsigned int>(salutmp1.rss2_data))
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
 
             // case BNE_:
             case DecodeParams::FN_SNE:
-                WARPS[salutmp1.warp_id].branch_sig = true;
+                WARPS[salutmp1.warp_id]->branch_sig = true;
                 if (salutmp1.rss1_data != salutmp1.rss2_data)
                 {
-                    WARPS[salutmp1.warp_id].jump = 1;
-                    WARPS[salutmp1.warp_id].jump_addr = salutmp1.rss3_data;
+                    WARPS[salutmp1.warp_id]->jump = 1;
+                    WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 break;
             }
@@ -1123,12 +1123,12 @@ void BASE::SIMT_STACK(int warp_id)
     while (true)
     {
         wait(clk.posedge_event());
-        WARPS[warp_id].simtstk_jump = false;
-        WARPS[warp_id].simtstk_flush = false;
-        WARPS[warp_id].vbran_sig = false;
+        WARPS[warp_id]->simtstk_jump = false;
+        WARPS[warp_id]->simtstk_flush = false;
+        WARPS[warp_id]->vbran_sig = false;
         if (valuto_simtstk && vbranchins_warpid == warp_id) // VALU计算的beq类指令
         {
-            WARPS[warp_id].vbran_sig = true;
+            WARPS[warp_id]->vbran_sig = true;
             if (emito_simtstk)
                 cout << "SIMT-STACK error: receive join & beq at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
@@ -1151,62 +1151,62 @@ void BASE::SIMT_STACK(int warp_id)
             newstkelem.rmask = vbranch_ins.read().mask;
             newstkelem.elsepc = branch_elsepc;
             newstkelem.elsemask = branch_elsemask;
-            WARPS[warp_id].simt_stack.push(newstkelem);
+            WARPS[warp_id]->simt_stack.push(newstkelem);
             cout << "SIMT-stack warp" << warp_id << " pushed elem" << newstkelem << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             /*** 以下为分支控制 ***/
             if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == std::bitset<num_thread>().set())
             { // ifmask全为0
-                WARPS[warp_id].simtstk_jumpaddr = branch_elsepc;
-                WARPS[warp_id].current_mask = branch_elsemask;
-                WARPS[warp_id].simtstk_jump = true;
-                WARPS[warp_id].simtstk_flush = true;
+                WARPS[warp_id]->simtstk_jumpaddr = branch_elsepc;
+                WARPS[warp_id]->current_mask = branch_elsemask;
+                WARPS[warp_id]->simtstk_jump = true;
+                WARPS[warp_id]->simtstk_flush = true;
             }
             else
             { // 需要先走if path
-                WARPS[warp_id].current_mask = branch_ifmask;
+                WARPS[warp_id]->current_mask = branch_ifmask;
             }
         }
         if (emito_simtstk && emitins_warpid == warp_id) // OPC发射的join指令
         {
-            WARPS[warp_id].vbran_sig = true;
-            simtstack_t &tmpstkelem = WARPS[warp_id].simt_stack.top();
+            WARPS[warp_id]->vbran_sig = true;
+            simtstack_t &tmpstkelem = WARPS[warp_id]->simt_stack.top();
             readins = emit_ins;
             /*** 以下为分支控制 ***/
             if (tmpstkelem.pair == 1)
             { // 意味着elsemask全为0，此时遇到的是if path的join
                 // ↓直接跳转到汇合点，跳转地址是join指令的跳转地址
-                WARPS[warp_id].simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
-                WARPS[warp_id].current_mask = tmpstkelem.rmask;
-                WARPS[warp_id].simtstk_jump = true;
-                WARPS[warp_id].simtstk_flush = true;
+                WARPS[warp_id]->simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
+                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
+                WARPS[warp_id]->simtstk_jump = true;
+                WARPS[warp_id]->simtstk_flush = true;
             }
             else if (tmpstkelem.is_part == 1 && readins.d == 1)
             { // else path结束，汇合点紧跟着else path的指令
                 // 所以readins.d==1，即join指令的相对跳转为1，
                 // 这意味着else path紧跟着汇合点，不需要冲刷
-                WARPS[warp_id].current_mask = tmpstkelem.rmask;
-                WARPS[warp_id].simtstk_jump = false;
-                WARPS[warp_id].simtstk_flush = false;
+                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
+                WARPS[warp_id]->simtstk_jump = false;
+                WARPS[warp_id]->simtstk_flush = false;
             }
             else if (tmpstkelem.is_part == 1)
             { // else path结束，汇合点紧跟着else path的指令
                 // 所以readins.d==1，即join指令的跳转为1
-                WARPS[warp_id].simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
-                WARPS[warp_id].current_mask = tmpstkelem.rmask;
-                WARPS[warp_id].simtstk_jump = true;
-                WARPS[warp_id].simtstk_flush = true;
+                WARPS[warp_id]->simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
+                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
+                WARPS[warp_id]->simtstk_jump = true;
+                WARPS[warp_id]->simtstk_flush = true;
             }
             else
             {
-                WARPS[warp_id].current_mask = tmpstkelem.elsemask;
+                WARPS[warp_id]->current_mask = tmpstkelem.elsemask;
                 // 不用跳转到else pc???
             }
 
             /*** 以下为stack管理 ***/
             if (tmpstkelem.is_part == 1)
             {
-                WARPS[warp_id].simt_stack.pop();
+                WARPS[warp_id]->simt_stack.pop();
             }
             else
             {
@@ -1303,33 +1303,33 @@ void BASE::CSR_CALC()
             {
             case CSRRW_:
                 // case DecodeParams::FN_ADD:
-                t = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
+                t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
                 break;
             case CSRRS_:
-                t = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
+                t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = csrtmp1.csrSdata1;
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.csrSdata1;
                 break;
             case CSRRC_:
-                t = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
+                t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = t & ~csrtmp1.csrSdata1;
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.csrSdata1;
                 break;
             case CSRRWI_:
-                csrtmp2.data = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = csrtmp1.ins.s1;
+                csrtmp2.data = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
                 break;
             case CSRRSI_:
-                t = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
+                t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = csrtmp1.ins.s1;
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
                 break;
             case CSRRCI_:
-                t = WARPS[csrtmp1.warp_id].CSR_reg[csr_addr];
+                t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id].CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
                 break;
             }
             csrfifo.push(csrtmp2);
