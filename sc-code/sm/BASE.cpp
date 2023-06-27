@@ -44,10 +44,12 @@ void BASE::debug_display3()
 
 void BASE::PROGRAM_COUNTER(int warp_id)
 {
-    WARPS[warp_id]->pc = 0x80000000;
+    WARPS[warp_id]->pc = 0;
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " PC: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(clk.posedge_event());
+        // cout << "SM" << sm_id << " warp" << warp_id << " PC: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "PC warp" << warp_id << " start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // wait(WARPS[warp_id]->ev_ibuf_inout); // ibuf判断swallow后，fetch新指令
         // cout << "PC start, ibuf_swallow=" << ibuf_swallow << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
@@ -56,7 +58,7 @@ void BASE::PROGRAM_COUNTER(int warp_id)
         {
             if (rst_n == 0)
             {
-                WARPS[warp_id]->pc = 0x80000000 - 4;
+                WARPS[warp_id]->pc = -4;
                 WARPS[warp_id]->fetch_valid = false;
             }
             else if (WARPS[warp_id]->jump == 1)
@@ -96,7 +98,9 @@ void BASE::INSTRUCTION_REG(int warp_id)
 
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(clk.posedge_event());
+        // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (WARPS[warp_id]->is_warp_activated)
         {
             if (WARPS[warp_id]->jump == 1 |
@@ -113,11 +117,17 @@ void BASE::INSTRUCTION_REG(int warp_id)
                             : I_TYPE(INVALID_, 0, 0, 0);
                 else if (inssrc == "imem")
                 {
+                    // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: fetch_ins pc=" << WARPS[warp_id]->pc.read() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    // WARPS[warp_id]->fetch_ins =
+                    //     (WARPS[warp_id]->pc.read() >= 0x80000000)
+                    //         ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read() - 0x80000000) / 4])
+                    //         : I_TYPE(INVALID_, 0, 0, 0);
                     WARPS[warp_id]->fetch_ins =
-                        (WARPS[warp_id]->pc.read() >= 0x80000000)
-                            ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read() - 0x80000000) / 4])
+                        (WARPS[warp_id]->pc.read() >= 0)
+                            ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read()) / 4])
                             : I_TYPE(INVALID_, 0, 0, 0);
                     // cout << "ICACHE: ins_mem[" << std::dec << WARPS[warp_id]->pc.read() / 4 << "]=" << std::hex << ins_mem[WARPS[warp_id]->pc.read() / 4] << ", fetch_ins.bit=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec << "\n";
+                    // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: finish fetch_ins pc=" << WARPS[warp_id]->pc.read() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
 
                 else
@@ -141,7 +151,9 @@ void BASE::DECODE(int warp_id)
     sc_bv<32> scinsbit;
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " DECODE: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(WARPS[warp_id]->ev_decode);
+        // cout << "SM" << sm_id << " warp" << warp_id << " DECODE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         tmpins = I_TYPE(WARPS[warp_id]->fetch_ins, WARPS[warp_id]->pc.read());
         if (inssrc == "imem")
         {
@@ -248,7 +260,9 @@ void BASE::IBUF_ACTION(int warp_id)
     I_TYPE _readdata3;
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " IBUF_ACTION: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(clk.posedge_event());
+        // cout << "SM" << sm_id << " warp" << warp_id << " IBUF_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "IBUF_ACTION warp" << warp_id << ": start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (WARPS[warp_id]->is_warp_activated)
         {
@@ -313,7 +327,9 @@ void BASE::UPDATE_SCORE(int warp_id)
     bool insertscore = false;
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " UPDATE_SCORE: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(clk.posedge_event());
+        // cout << "SM" << sm_id << " warp" << warp_id << " UPDATE_SCORE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (WARPS[warp_id]->is_warp_activated)
         {
             if (wb_ena && wb_warpid == warp_id)
@@ -402,7 +418,9 @@ void BASE::JUDGE_DISPATCH(int warp_id)
     I_TYPE _readibuf;
     while (true)
     {
+        // cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(WARPS[warp_id]->ev_judge_dispatch & WARPS[warp_id]->ev_ibuf_updated);
+        // cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "scoreboard: ibuftop_ins=" << ibuftop_ins << " at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
         if (WARPS[warp_id]->wait_bran | WARPS[warp_id]->jump)
         {
@@ -444,7 +462,9 @@ void BASE::ISSUE_ACTION()
     I_TYPE _newissueins;
     while (true)
     {
+        // cout << "SM" << sm_id << " ISSUE_ACTION: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(ev_issue_list);
+        // cout << "SM" << sm_id << " ISSUE_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "ISSUE start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (!opc_full | doemit) // 这是dispatch_ready (ready-valid机制)
         {
@@ -504,7 +524,9 @@ void BASE::OPC_FIFO()
     opcfifo_t newopcdat;
     while (true)
     {
+        // cout << "SM" << sm_id << " OPC_FIFO: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait();
+        // cout << "SM" << sm_id << " OPC_FIFO: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "OPC_FIFO start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (doemit)
         {
@@ -909,7 +931,7 @@ void BASE::WRITE_BACK()
     {
         wait(ev_salufifo_pushed & ev_valufifo_pushed & ev_vfpufifo_pushed &
              ev_lsufifo_pushed);
-        // cout << "WRITEBACK: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        // cout << "SM" << sm_id << " WRITEBACK: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (execpop_salu)
             salufifo.pop();
         if (execpop_valu)
@@ -1104,7 +1126,6 @@ void BASE::WRITE_REG(int warp_id)
     }
 }
 
-
-void BASE::activate_warp(int warp_id){
-
+void BASE::activate_warp(int warp_id)
+{
 }

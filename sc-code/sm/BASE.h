@@ -84,7 +84,7 @@ public:
     // initialize
     void start_of_simulation()
     {
-        for (auto warp_ : WARPS)
+        for (auto &warp_ : WARPS)
         {
             warp_->pc = -1;
             warp_->ibuftop_ins = I_TYPE(INVALID_, 0, 0, 0);
@@ -186,6 +186,7 @@ public:
     std::vector<instable_t> instable_vec;
     /*** SIMT frontend ***/
     std::array<WARP_BONE*, num_warp> WARPS;
+    // std::unordered_map<int, WARP_BONE*> WARPS;
     std::unordered_map<int, sc_core::sc_process_handle> PROGRAM_COUNTER_threads;
     std::unordered_map<int, sc_core::sc_process_handle> INSTRUCTION_REG_threads;
     std::unordered_map<int, sc_core::sc_process_handle> DECODE_threads;

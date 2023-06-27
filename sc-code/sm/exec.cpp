@@ -63,7 +63,7 @@ void BASE::SALU_IN()
             if (!salueqa_triggered)
             {
                 ev_salufifo_pushed.notify();
-                for (auto warp_ : WARPS)
+                for (auto &warp_ : WARPS)
                 {
                     warp_->jump = false;
                     warp_->branch_sig = false;
@@ -91,7 +91,7 @@ void BASE::SALU_CALC()
             wait(SC_ZERO_TIME);
             salueqa_triggered = false;
         }
-        for (auto warp_ : WARPS)
+        for (auto &warp_ : WARPS)
         {
             warp_->jump = false;
             warp_->branch_sig = false;

@@ -161,7 +161,7 @@ int sc_main(int argc, char *argv[])
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    sc_start(1000, SC_NS);
+    sc_start(10000, SC_NS);
 
     for (auto tf_ : tf)
         sc_close_vcd_trace_file(tf_);
