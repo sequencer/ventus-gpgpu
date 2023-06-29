@@ -609,4 +609,124 @@ SC_MODULE(STAGE)
   }
 };
 
+struct something_contain_ev
+{
+  sc_event evev;
+};
+
+SC_MODULE(MODIFY_EV_LIST)
+{
+public:
+  sc_event ev1, ev2, ev3;
+  sc_event_and_list evl1, evl2, evl3;
+  std::array<something_contain_ev *, 3> myarray;
+  void trig1()
+  {
+    while (true)
+    {
+      wait(5, SC_NS);
+      ev1.notify();
+    }
+  }
+  void trig2()
+  {
+    while (true)
+    {
+      wait(11, SC_NS);
+      ev2.notify();
+    }
+  }
+  void trig3()
+  {
+    while (true)
+    {
+      wait(30, SC_NS);
+      ev3.notify();
+    }
+  }
+  void modifylist()
+  {
+    wait(100, SC_NS);
+    evl2 &= ev1;
+    evl2 &= ev2;
+    evl1.swap(evl2);
+    // evl1 = evl2;
+    delete myarray[2];
+    myarray[2] = nullptr;
+    cout << "evl is changed at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+  }
+  void trig1a()
+  {
+    while (true)
+    {
+      wait(5, SC_NS);
+      if (myarray[0] != nullptr)
+      {
+        myarray[0]->evev.notify();
+      }
+    }
+  }
+  void trig2a()
+  {
+    while (true)
+    {
+      wait(11, SC_NS);
+      if (myarray[1] != nullptr)
+      {
+        myarray[1]->evev.notify();
+      }
+    }
+  }
+  void trig3a()
+  {
+    while (true)
+    {
+      wait(30, SC_NS);
+      if (myarray[2] != nullptr)
+      {
+        myarray[2]->evev.notify();
+      }
+    }
+  }
+
+  void wait_evl1()
+  {
+    while (true)
+    {
+      wait(evl1);
+      cout << "evl is notified at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+    }
+  }
+  void mymthd()
+  {
+    next_trigger(evl1);
+    cout << "method triggered at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+  }
+
+  SC_CTOR(MODIFY_EV_LIST)
+  {
+    evl1 &= ev1;
+    evl1 &= ev2;
+    evl1 &= ev3;
+
+    myarray[0] = new something_contain_ev;
+    myarray[1] = new something_contain_ev;
+    myarray[2] = new something_contain_ev;
+
+    evl3 &= myarray[0]->evev;
+    evl3 &= myarray[1]->evev;
+    evl3 &= myarray[2]->evev;
+
+    SC_THREAD(trig1);
+    SC_THREAD(trig2);
+    SC_THREAD(trig3);
+    SC_THREAD(trig1a);
+    SC_THREAD(trig2a);
+    SC_THREAD(trig3a);
+    SC_THREAD(modifylist);
+    // SC_THREAD(wait_evl1);
+    SC_METHOD(mymthd);
+  }
+};
+
 #endif

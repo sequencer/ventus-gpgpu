@@ -12,6 +12,7 @@ public:
     CTA_Scheduler();
     CTA_Scheduler(sc_core::sc_module_name name, std::string _filename) : sc_module(name), metafilename(_filename) {}
     void CTA_INIT();
+    void MONITOR_WARP_RET();
 
 public:
     sc_event ev_activate_warp;
@@ -29,6 +30,7 @@ private:
     void freeMetadata(meta_data &mtd);
     std::vector<uint64_t> metadata;
     std::string metafilename;
+    sc_event_or_list all_warp_ev_kernel_ret;
     
 };
 

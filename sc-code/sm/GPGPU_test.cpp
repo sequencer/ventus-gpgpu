@@ -46,7 +46,9 @@ int sc_main(int argc, char *argv[])
         BASE_impl[i]->datafile = "../../testcase/" + datafile;
         for (auto &warp_ : BASE_impl[i]->WARPS)
             if (warp_->is_warp_activated)
+            {
                 BASE_impl[i]->ev_issue_list &= warp_->ev_issue;
+            }
     }
 
     sc_clock clk("clk", PERIOD, SC_NS, 0.5, 0, SC_NS, false);

@@ -155,8 +155,11 @@ void BASE::DECODE(int warp_id)
         wait(WARPS[warp_id]->ev_decode);
         // cout << "SM" << sm_id << " warp" << warp_id << " DECODE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         tmpins = I_TYPE(WARPS[warp_id]->fetch_ins, WARPS[warp_id]->pc.read());
-        if (tmpins.origin32bit == 0x00008067)
+        if (tmpins.origin32bit == (uint32_t)0x00008067)
         {
+            WARPS[warp_id]->ev_kernel_ret.notify();
+            cout << "SM" << sm_id << " warp" << warp_id << " DECODE find ins ret and notify ev_kernel_ret at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            break;
         }
         if (inssrc == "imem")
         {
@@ -458,44 +461,81 @@ void BASE::JUDGE_DISPATCH(int warp_id)
     }
 }
 
+// void BASE::ISSUE_ACTION()
+// {
+//     bool find_dispatchwarp = 0;
+//     last_dispatch_warpid = 0;
+//     I_TYPE _newissueins;
+//     while (true)
+//     {
+//         // cout << "SM" << sm_id << " ISSUE_ACTION: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//         wait(ev_issue_list);
+//         // cout << "SM" << sm_id << " ISSUE_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//         // cout << "ISSUE start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//         if (!opc_full | doemit) // 这是dispatch_ready (ready-valid机制)
+//         {
+//             find_dispatchwarp = 0;
+//             for (int i = last_dispatch_warpid; i < last_dispatch_warpid + num_warp_activated; i++)
+//             {
+//                 if (!find_dispatchwarp && WARPS[i % num_warp_activated]->can_dispatch)
+//                 {
+//                     // cout << "ISSUE: opc_full=" << opc_full << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//                     WARPS[i % num_warp_activated]->dispatch_warp_valid = true;
+//                     dispatch_valid = true;
+//                     _newissueins = WARPS[i % num_warp_activated]->ififo.front();
+//                     _newissueins.mask = WARPS[i % num_warp_activated]->current_mask;
+//                     // cout << "let issue_ins mask=" << _newissueins.mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//                     issue_ins = _newissueins;
+//                     issueins_warpid = i % num_warp_activated;
+//                     find_dispatchwarp = true;
+//                     last_dispatch_warpid = i % num_warp_activated + 1;
+//                 }
+//                 else
+//                 {
+//                     WARPS[i % num_warp_activated]->dispatch_warp_valid = false;
+//                     // cout << "ISSUE: let warp" << i % num_warp_activated << " dispatch_warp_valid=false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+//                 }
+//             }
+//             if (!find_dispatchwarp)
+//                 dispatch_valid = false;
+//         }
+//     }
+// }
 void BASE::ISSUE_ACTION()
 {
     bool find_dispatchwarp = 0;
     last_dispatch_warpid = 0;
     I_TYPE _newissueins;
-    while (true)
+
+    // cout << "SM" << sm_id << " ISSUE_ACTION: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+    // cout << "SM" << sm_id << " ISSUE_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+    // cout << "ISSUE start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+    if (!opc_full | doemit) // 这是dispatch_ready (ready-valid机制)
     {
-        // cout << "SM" << sm_id << " ISSUE_ACTION: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-        wait(ev_issue_list);
-        // cout << "SM" << sm_id << " ISSUE_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-        // cout << "ISSUE start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-        if (!opc_full | doemit) // 这是dispatch_ready (ready-valid机制)
+        find_dispatchwarp = 0;
+        for (int i = last_dispatch_warpid; i < last_dispatch_warpid + num_warp_activated; i++)
         {
-            find_dispatchwarp = 0;
-            for (int i = last_dispatch_warpid; i < last_dispatch_warpid + num_warp_activated; i++)
+            if (!find_dispatchwarp && WARPS[i % num_warp_activated]->can_dispatch)
             {
-                if (!find_dispatchwarp && WARPS[i % num_warp_activated]->can_dispatch)
-                {
-                    // cout << "ISSUE: opc_full=" << opc_full << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                    WARPS[i % num_warp_activated]->dispatch_warp_valid = true;
-                    dispatch_valid = true;
-                    _newissueins = WARPS[i % num_warp_activated]->ififo.front();
-                    _newissueins.mask = WARPS[i % num_warp_activated]->current_mask;
-                    // cout << "let issue_ins mask=" << _newissueins.mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                    issue_ins = _newissueins;
-                    issueins_warpid = i % num_warp_activated;
-                    find_dispatchwarp = true;
-                    last_dispatch_warpid = i % num_warp_activated + 1;
-                }
-                else
-                {
-                    WARPS[i % num_warp_activated]->dispatch_warp_valid = false;
-                    // cout << "ISSUE: let warp" << i % num_warp_activated << " dispatch_warp_valid=false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                }
+                // cout << "ISSUE: opc_full=" << opc_full << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                WARPS[i % num_warp_activated]->dispatch_warp_valid = true;
+                dispatch_valid = true;
+                _newissueins = WARPS[i % num_warp_activated]->ififo.front();
+                _newissueins.mask = WARPS[i % num_warp_activated]->current_mask;
+                // cout << "let issue_ins mask=" << _newissueins.mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                issue_ins = _newissueins;
+                issueins_warpid = i % num_warp_activated;
+                find_dispatchwarp = true;
+                last_dispatch_warpid = i % num_warp_activated + 1;
             }
-            if (!find_dispatchwarp)
-                dispatch_valid = false;
+            else
+            {
+                WARPS[i % num_warp_activated]->dispatch_warp_valid = false;
+                // cout << "ISSUE: let warp" << i % num_warp_activated << " dispatch_warp_valid=false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            }
         }
+        if (!find_dispatchwarp)
+            dispatch_valid = false;
     }
 }
 
@@ -1136,15 +1176,15 @@ void BASE::activate_warp(int warp_id)
         WARP_BONE *new_warp_bone_ = new WARP_BONE;
         WARPS[warp_id] = new_warp_bone_;
 
-        warp_threads_group[0][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::PROGRAM_COUNTER, this, warp_id), ("warp" + std::to_string(warp_id) + "_PROGRAM_COUNTER").c_str()));
-        warp_threads_group[1][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INSTRUCTION_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INSTRUCTION_REG").c_str()));
-        warp_threads_group[2][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::DECODE, this, warp_id), ("warp" + std::to_string(warp_id) + "_DECODE").c_str()));
-        warp_threads_group[3][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::IBUF_ACTION, this, warp_id), ("warp" + std::to_string(warp_id) + "_IBUF_ACTION").c_str()));
-        warp_threads_group[4][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, warp_id), ("warp" + std::to_string(warp_id) + "_JUDGE_DISPATCH").c_str()));
-        warp_threads_group[5][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, warp_id), ("warp" + std::to_string(warp_id) + "_UPDATE_SCORE").c_str()));
-        warp_threads_group[6][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INIT_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INIT_REG").c_str()));
-        warp_threads_group[7][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::SIMT_STACK, this, warp_id), ("warp" + std::to_string(warp_id) + "_SIMT_STACK").c_str()));
-        warp_threads_group[8][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::WRITE_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_WRITE_REG").c_str()));
+        // warp_threads_group[0][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::PROGRAM_COUNTER, this, warp_id), ("warp" + std::to_string(warp_id) + "_PROGRAM_COUNTER").c_str()));
+        // warp_threads_group[1][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INSTRUCTION_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INSTRUCTION_REG").c_str()));
+        // warp_threads_group[2][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::DECODE, this, warp_id), ("warp" + std::to_string(warp_id) + "_DECODE").c_str()));
+        // warp_threads_group[3][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::IBUF_ACTION, this, warp_id), ("warp" + std::to_string(warp_id) + "_IBUF_ACTION").c_str()));
+        // warp_threads_group[4][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, warp_id), ("warp" + std::to_string(warp_id) + "_JUDGE_DISPATCH").c_str()));
+        // warp_threads_group[5][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, warp_id), ("warp" + std::to_string(warp_id) + "_UPDATE_SCORE").c_str()));
+        // warp_threads_group[6][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INIT_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INIT_REG").c_str()));
+        // warp_threads_group[7][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::SIMT_STACK, this, warp_id), ("warp" + std::to_string(warp_id) + "_SIMT_STACK").c_str()));
+        // warp_threads_group[8][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::WRITE_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_WRITE_REG").c_str()));
     }
     else
     {
@@ -1158,9 +1198,10 @@ void BASE::remove_warp(int warp_id)
     {
         delete WARPS[warp_id];
         WARPS[warp_id] = nullptr;
-        for(auto &threads : warp_threads_group){
-            sc_process_handle* thread_to_delete = threads[warp_id];
-            if(thread_to_delete != nullptr)
+        for (auto &threads : warp_threads_group)
+        {
+            sc_process_handle *thread_to_delete = threads[warp_id];
+            if (thread_to_delete != nullptr)
             {
                 thread_to_delete->kill();
                 delete thread_to_delete;

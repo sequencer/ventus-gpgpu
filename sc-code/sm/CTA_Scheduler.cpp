@@ -132,9 +132,11 @@ void CTA_Scheduler::activate_warp()
         int warp_counter = 0;
         while (warp_counter < mtd.wg_size)
         {
-            sm_group[i]->WARPS[warp_counter] = new WARP_BONE;
-            WARP_BONE* neo_warp = new WARP_BONE;
-            
+            // sm_group[i]->WARPS[warp_counter] = new WARP_BONE;
+            // sm_group[i]->WARPS[warp_counter]->warp_id = warp_counter;
+
+            sm_group[i]->activate_warp(warp_counter);
+
             cout << "CTA: SM" << i << " warp" << warp_counter << " is activated\n";
             sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[1] = mtd.wg_size;

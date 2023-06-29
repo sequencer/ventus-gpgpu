@@ -123,8 +123,8 @@ public:
 
         SC_THREAD(INIT_INS);
         // issue
-        SC_THREAD(ISSUE_ACTION);
-        sensitive << clk.pos();
+        SC_METHOD(ISSUE_ACTION);
+        sensitive << ev_issue_list;
         // opc
         SC_THREAD(OPC_FIFO);
         sensitive << clk.pos();

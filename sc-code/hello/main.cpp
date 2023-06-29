@@ -119,9 +119,14 @@ int sc_main(int argc, char *argv[])
   // sc_start(100, SC_NS);
   // return 0; // Terminate simulation
 
-  // 不同仿真阶段
-  STAGE stage("stage"); // Elaboration
-  stage.printinmain();
-  sc_start(); // Execution till sc_stop
+  // // 不同仿真阶段
+  // STAGE stage("stage"); // Elaboration
+  // stage.printinmain();
+  // sc_start(); // Execution till sc_stop
+  // return 0;   // Cleanup
+
+  // 修改sc_event_list
+  MODIFY_EV_LIST MODI("modi");
+  sc_start(300, SC_NS); // Execution till sc_stop
   return 0;   // Cleanup
 }

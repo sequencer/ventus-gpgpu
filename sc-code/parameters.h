@@ -1574,6 +1574,7 @@ class WARP_BONE
 {
 public:
     int warp_id;
+    sc_event ev_kernel_ret; // 当前warp已经执行完kernel
 
     WARP_BONE()
     {
@@ -1584,8 +1585,8 @@ public:
 
     // fetch
     sc_event ev_fetchpc, ev_decode;
-    sc_signal<bool> ibuf_swallow; // 表示是否接收上一cycle fetch_valid，相当于ready
-    sc_signal<bool> fetch_valid{"fetch_valid"}, fetch_valid2{"fetch_valid2"};   // 2是真正的valid，直接与ibuffer沟通
+    sc_signal<bool> ibuf_swallow;                                                                    // 表示是否接收上一cycle fetch_valid，相当于ready
+    sc_signal<bool> fetch_valid{"fetch_valid"}, fetch_valid2{"fetch_valid2"};                        // 2是真正的valid，直接与ibuffer沟通
     sc_signal<bool, SC_MANY_WRITERS> jump{"jump"}, branch_sig{"branch_sig"}, vbran_sig{"vbran_sig"}; // 无论是否jump，只要发生了分支判断，将branch_sig置为1
     sc_signal<int> jump_addr{"jump_addr"}, pc{"pc"};
     I_TYPE fetch_ins;
@@ -1648,7 +1649,6 @@ struct meta_data
     uint64_t *buffer_base;     ///> 各buffer的基址。第一块buffer是给硬件用的metadata
     uint64_t *buffer_size;     ///> 各buffer的size，以Bytes为单位
 };
-
 
 uint32_t extractBits32(uint32_t number, int start, int end);
 
