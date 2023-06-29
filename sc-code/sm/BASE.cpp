@@ -155,6 +155,9 @@ void BASE::DECODE(int warp_id)
         wait(WARPS[warp_id]->ev_decode);
         // cout << "SM" << sm_id << " warp" << warp_id << " DECODE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         tmpins = I_TYPE(WARPS[warp_id]->fetch_ins, WARPS[warp_id]->pc.read());
+        if (tmpins.origin32bit == 0x00008067)
+        {
+        }
         if (inssrc == "imem")
         {
             bool foundBitIns = 0;
@@ -1128,4 +1131,45 @@ void BASE::WRITE_REG(int warp_id)
 
 void BASE::activate_warp(int warp_id)
 {
+    if (WARPS[warp_id] == nullptr)
+    {
+        WARP_BONE *new_warp_bone_ = new WARP_BONE;
+        WARPS[warp_id] = new_warp_bone_;
+
+        warp_threads_group[0][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::PROGRAM_COUNTER, this, warp_id), ("warp" + std::to_string(warp_id) + "_PROGRAM_COUNTER").c_str()));
+        warp_threads_group[1][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INSTRUCTION_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INSTRUCTION_REG").c_str()));
+        warp_threads_group[2][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::DECODE, this, warp_id), ("warp" + std::to_string(warp_id) + "_DECODE").c_str()));
+        warp_threads_group[3][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::IBUF_ACTION, this, warp_id), ("warp" + std::to_string(warp_id) + "_IBUF_ACTION").c_str()));
+        warp_threads_group[4][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, warp_id), ("warp" + std::to_string(warp_id) + "_JUDGE_DISPATCH").c_str()));
+        warp_threads_group[5][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, warp_id), ("warp" + std::to_string(warp_id) + "_UPDATE_SCORE").c_str()));
+        warp_threads_group[6][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::INIT_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_INIT_REG").c_str()));
+        warp_threads_group[7][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::SIMT_STACK, this, warp_id), ("warp" + std::to_string(warp_id) + "_SIMT_STACK").c_str()));
+        warp_threads_group[8][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::WRITE_REG, this, warp_id), ("warp" + std::to_string(warp_id) + "_WRITE_REG").c_str()));
+    }
+    else
+    {
+        cout << "Activate warp error: warp" << warp_id << " already exists!\n";
+    }
+}
+
+void BASE::remove_warp(int warp_id)
+{
+    if (WARPS[warp_id] != nullptr)
+    {
+        delete WARPS[warp_id];
+        WARPS[warp_id] = nullptr;
+        for(auto &threads : warp_threads_group){
+            sc_process_handle* thread_to_delete = threads[warp_id];
+            if(thread_to_delete != nullptr)
+            {
+                thread_to_delete->kill();
+                delete thread_to_delete;
+                threads[warp_id] = nullptr;
+            }
+        }
+    }
+    else
+    {
+        cout << "Remove warp error: warp" << warp_id << " doesn't exist!\n";
+    }
 }

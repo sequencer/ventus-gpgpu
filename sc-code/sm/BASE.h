@@ -21,6 +21,7 @@ public:
     void readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, uint64_t *buffer_size);
     void writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size);
     void activate_warp(int warp_id);
+    void remove_warp(int warp_id);
 
     // fetch
     void INIT_INS();
@@ -75,7 +76,7 @@ public:
     void MUL_IN();
     void MUL_CALC();
     void MUL_CTRL();
-        void SFU_IN();
+    void SFU_IN();
     void SFU_CALC();
     void SFU_CTRL();
     // writeback
@@ -185,16 +186,19 @@ public:
     std::map<OP_TYPE, decodedat> decode_table;
     std::vector<instable_t> instable_vec;
     /*** SIMT frontend ***/
-    std::array<WARP_BONE*, num_warp> WARPS;
+    std::array<WARP_BONE *, num_warp> WARPS;
     // std::unordered_map<int, WARP_BONE*> WARPS;
-    std::unordered_map<int, sc_core::sc_process_handle> PROGRAM_COUNTER_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> INSTRUCTION_REG_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> DECODE_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> IBUF_ACTION_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> JUDGE_DISPATCH_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> UPDATE_SCORE_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> INIT_REG_threads;
-    std::unordered_map<int, sc_core::sc_process_handle> WRITE_REG_threads;
+
+    std::array<std::array<sc_core::sc_process_handle *, num_warp>, 9> warp_threads_group;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_PROGRAM_COUNTER;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_INSTRUCTION_REG;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_DECODE;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_IBUF_ACTION;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_JUDGE_DISPATCH;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_UPDATE_SCORE;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_INIT_REG;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_SIMT_STACK;
+    // std::array<sc_core::sc_process_handle *, num_warp> threads_WRITE_REG;
 
     /*** SIMD backend ***/
     // issue
@@ -344,7 +348,7 @@ public:
     bool sfufifo_empty, sfufifo_push;
     int sfufifo_elem_num;
     sc_signal<bool> sfueqa_triggered, sfueqb_triggered;
-    
+
     // writeback
     sc_signal<bool> write_s, write_v, write_f;
     sc_signal<bool> execpop_salu, execpop_valu, execpop_vfpu, execpop_lsu;
