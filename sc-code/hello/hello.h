@@ -1,3 +1,6 @@
+#ifndef SC_INCLUDE_DYNAMIC_PROCESSES
+#define SC_INCLUDE_DYNAMIC_PROCESSES
+#endif
 #ifndef _HELLO_H
 #define _HELLO_H
 
@@ -726,6 +729,43 @@ public:
     SC_THREAD(modifylist);
     // SC_THREAD(wait_evl1);
     SC_METHOD(mymthd);
+  }
+};
+
+// mutex互斥锁
+class MyModule : public sc_core::sc_module
+{
+public:
+  sc_mutex mtx;        // 互斥锁
+  int shared_resource; // 共享资源
+  sc_signal<int> sc_sha_resource;
+
+  void incrementSharedResource(int thread_id)
+  {
+    while (true)
+    {
+      // 加锁
+      mtx.lock();
+      wait(20, SC_NS);
+      // 访问共享资源
+      ++shared_resource;
+      cout << "Thread " << thread_id << ": Incremented shared resource to " << shared_resource << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
+      // 释放锁
+      mtx.unlock();
+
+      // 模拟一段时间的非共享资源操作
+      wait(thread_id * 2, SC_NS);
+    }
+  }
+
+  MyModule(sc_core::sc_module_name name) : sc_module(name)
+  {
+    SC_HAS_PROCESS(MyModule);
+    for (int i = 0; i < 5; i++)
+    {
+      sc_spawn(sc_bind(&MyModule::incrementSharedResource, this, i));
+    }
   }
 };
 

@@ -33,12 +33,18 @@ public:
     void DECODE(int warp_id);
     // ibuffer
     void IBUF_ACTION(int warp_id);
+    void cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readdata3);
     void IBUF_PARAM(int warp_id);
     // scoreboard
-    void JUDGE_DISPATCH(int warp_id);
     void UPDATE_SCORE(int warp_id);
+    void cycle_UPDATE_SCORE(int warp_id, I_TYPE &tmpins, std::set<SCORE_TYPE>::iterator &it, REG_TYPE &regtype_, bool &insertscore);
+    void JUDGE_DISPATCH(int warp_id);
+    void cycle_JUDGE_DISPATCH(int warp_id, I_TYPE &_readibuf);
+    void BEFORE_DISPATCH(int warp_id);
     // issue
     void ISSUE_ACTION();
+    void cycle_ISSUE_ACTION();
+    void WARP_SCHEDULER();
     // opc
     void OPC_FIFO();
     void OPC_FETCH();
@@ -113,9 +119,10 @@ public:
             sc_spawn(sc_bind(&BASE::PROGRAM_COUNTER, this, i), ("warp" + std::to_string(i) + "_PROGRAM_COUNTER").c_str());
             sc_spawn(sc_bind(&BASE::INSTRUCTION_REG, this, i), ("warp" + std::to_string(i) + "_INSTRUCTION_REG").c_str());
             sc_spawn(sc_bind(&BASE::DECODE, this, i), ("warp" + std::to_string(i) + "_DECODE").c_str());
-            sc_spawn(sc_bind(&BASE::IBUF_ACTION, this, i), ("warp" + std::to_string(i) + "_IBUF_ACTION").c_str());
-            sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, i), ("warp" + std::to_string(i) + "_JUDGE_DISPATCH").c_str());
-            sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, i), ("warp" + std::to_string(i) + "_UPDATE_SCORE").c_str());
+            // sc_spawn(sc_bind(&BASE::IBUF_ACTION, this, i), ("warp" + std::to_string(i) + "_IBUF_ACTION").c_str());
+            // sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, i), ("warp" + std::to_string(i) + "_JUDGE_DISPATCH").c_str());
+            // sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, i), ("warp" + std::to_string(i) + "_UPDATE_SCORE").c_str());
+            sc_spawn(sc_bind(&BASE::BEFORE_DISPATCH, this, i), ("warp" + std::to_string(i) + "_BEFORE_DISPATCH").c_str());
             sc_spawn(sc_bind(&BASE::INIT_REG, this, i), ("warp" + std::to_string(i) + "_INIT_REG").c_str());
             sc_spawn(sc_bind(&BASE::SIMT_STACK, this, i), ("warp" + std::to_string(i) + "_SIMT_STACK").c_str());
             sc_spawn(sc_bind(&BASE::WRITE_REG, this, i), ("warp" + std::to_string(i) + "_WRITE_REG").c_str());
@@ -123,8 +130,8 @@ public:
 
         SC_THREAD(INIT_INS);
         // issue
-        SC_METHOD(ISSUE_ACTION);
-        sensitive << ev_issue_list;
+        // SC_THREAD(ISSUE_ACTION);
+        SC_THREAD(WARP_SCHEDULER);
         // opc
         SC_THREAD(OPC_FIFO);
         sensitive << clk.pos();
@@ -207,6 +214,8 @@ public:
     sc_signal<int> issueins_warpid;
     sc_signal<int> last_dispatch_warpid{"last_dispatch_warpid"}; // 需要设为sc_signal，否则ISSUE_ACTION对i的循环边界【i < last_dispatch_warpid + num_warp】会变化
     sc_signal<bool> dispatch_valid{"dispatch_valid"};
+    // warp scheduler
+    sc_event ev_warp_assigned;
     // opc
     sc_signal<int> last_emit_entryid{"last_emit_entryid"};
     sc_event ev_opc_pop, ev_regfile_readdata,

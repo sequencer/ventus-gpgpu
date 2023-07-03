@@ -125,8 +125,13 @@ int sc_main(int argc, char *argv[])
   // sc_start(); // Execution till sc_stop
   // return 0;   // Cleanup
 
-  // 修改sc_event_list
-  MODIFY_EV_LIST MODI("modi");
-  sc_start(300, SC_NS); // Execution till sc_stop
-  return 0;   // Cleanup
+  // // 修改sc_event_list
+  // MODIFY_EV_LIST MODI("modi");
+  // sc_start(300, SC_NS); // Execution till sc_stop
+  // return 0;   // Cleanup
+
+  // mutex互斥锁
+  MyModule module("module");
+  sc_start(1000, SC_NS);
+  return 0;
 }
