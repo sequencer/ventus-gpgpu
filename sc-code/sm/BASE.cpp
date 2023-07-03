@@ -135,6 +135,10 @@ void BASE::INSTRUCTION_REG(int warp_id)
                 WARPS[warp_id]->ev_decode.notify();
             }
 
+            // if (WARPS[warp_id]->ibuf_full)
+            //     if (sm_id == 0 && warp_id == 0)
+            //         cout << "SM" << sm_id << " warp" << warp_id << " ibuf_full=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
             // cout << "pc=" << pc << ", fetch_ins is " << fetch_ins << " at " << sc_time_stamp()
             //      << ", it will be " << ireg[pc.read()] << " at the next timestamp"
             //      << "\n";
@@ -155,9 +159,12 @@ void BASE::DECODE(int warp_id)
         wait(WARPS[warp_id]->ev_decode);
         // cout << "SM" << sm_id << " warp" << warp_id << " DECODE: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         tmpins = I_TYPE(WARPS[warp_id]->fetch_ins, WARPS[warp_id]->pc.read());
+        // if (sm_id == 0 && warp_id == 0)
+        //     cout << "SM" << sm_id << " warp" << warp_id << " DECODE ins.bit=" << std::hex << tmpins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (tmpins.origin32bit == (uint32_t)0x00008067)
         {
-            WARPS[warp_id]->ev_kernel_ret.notify();
+            // WARPS[warp_id]->ev_kernel_ret.notify();
+
             cout << "SM" << sm_id << " warp" << warp_id << " DECODE find ins ret and notify ev_kernel_ret at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             break;
         }
@@ -271,6 +278,13 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         {
             // cout << "before dispatch, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             dispatch_ins_ = WARPS[warp_id]->ififo.get();
+            if (sm_id == 0 && warp_id == 0)
+            {
+                if (!WARPS[warp_id]->ififo.isempty())
+                    cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf.top become " << WARPS[warp_id]->ififo.front().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                else
+                    cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf become empty at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            }
             // cout << "IBUF: after dispatch, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
         }
         else
@@ -310,6 +324,8 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         WARPS[warp_id]->ififo_elem_num = WARPS[warp_id]->ififo.used();
         // cout << "ififo has " << ififo.used() << " elems in it at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
     }
+    if (sm_id == 0 && warp_id == 0)
+        cout << "SM" << sm_id << " warp" << warp_id << " IBUF ififo_elem_num=" << WARPS[warp_id]->ififo_elem_num << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 }
 
 void BASE::IBUF_ACTION(int warp_id)
@@ -381,6 +397,8 @@ void BASE::cycle_UPDATE_SCORE(int warp_id, I_TYPE &tmpins, std::set<SCORE_TYPE>:
         {
             if (tmpins.ddd.wxd)
                 cout << "Scoreboard warp" << warp_id << " error: dispatch_ins wvd=wxd=1 at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            if (sm_id == 0 && warp_id == 0 && tmpins.d == 0)
+                cout << "SM" << sm_id << " warp" << warp_id << " UPDATE_SCORE insert ins.bit=" << std::hex << tmpins.origin32bit << std::dec << " vector regfile 0 to scoreboard at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             regtype_ = v;
         }
         else if (tmpins.ddd.wxd)
@@ -445,6 +463,14 @@ void BASE::cycle_JUDGE_DISPATCH(int warp_id, I_TYPE &_readibuf)
             WARPS[warp_id]->can_dispatch = false;
         else if (_readibuf.ddd.sel_alu3 == DecodeParams::A3_VRS3 && WARPS[warp_id]->score.find(SCORE_TYPE(v, _readibuf.d)) != WARPS[warp_id]->score.end())
             WARPS[warp_id]->can_dispatch = false;
+
+        // if (sm_id == 0 && warp_id == 0)
+        //     if (WARPS[warp_id]->can_dispatch == false)
+        //         cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH=false with ins.bit=" << std::hex << _readibuf.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
+        // if (sm_id == 0 && warp_id == 0 && _readibuf.origin32bit == uint32_t(0x96013057) && WARPS[warp_id]->can_dispatch == false)
+        if (sm_id == 0 && warp_id == 0 && WARPS[warp_id]->can_dispatch == false)
+            cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH meet ins.bit=" << std::hex << _readibuf.origin32bit << std::dec << ", can't dispatch, ins.d=" << _readibuf.d << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
     }
 }
 
