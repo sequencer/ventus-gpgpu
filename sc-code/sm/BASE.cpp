@@ -301,6 +301,8 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
             {
                 WARPS[warp_id]->ififo.push(WARPS[warp_id]->decode_ins.read());
                 WARPS[warp_id]->ibuf_swallow = true;
+                if (sm_id == 0 && warp_id == 0)
+                    cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             // cout << "before put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             // cout << "after put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
