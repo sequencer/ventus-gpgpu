@@ -25,7 +25,9 @@ int sc_main(int argc, char *argv[])
             i++;
         }
     }
+    std::cout << "Finish reading runtime args, "<< argc <<" args found\n";
 
+    std::cout << "----------Initializing SM data-structures----------\n";
     BASE **BASE_impl;
     // BASE_impl = new BASE("BASE", inssrc);
     BASE_impl = new BASE *[NUM_SM];
@@ -36,6 +38,7 @@ int sc_main(int argc, char *argv[])
 
     BASE_sti BASE_sti_impl("BASE_STI");
 
+    std::cout << "----------Initializing CTAs----------\n";
     CTA_Scheduler cta_impl("CTA_Scheduler", "../../testcase/" + metafile);
     cta_impl.sm_group = BASE_impl;
     cta_impl.CTA_INIT();
@@ -162,6 +165,7 @@ int sc_main(int argc, char *argv[])
         // sc_trace(tf[i], BASE_impl., "");
     }
 
+    std::cout << "----------Simulation start----------\n";
     auto start = std::chrono::high_resolution_clock::now();
     sc_start(3000, SC_NS);
 

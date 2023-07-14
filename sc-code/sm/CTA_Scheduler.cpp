@@ -69,10 +69,13 @@ void CTA_Scheduler::readHexFile(const std::string &filename, int itemSize, std::
     }
 
     file.close();
+    std::cout << "CTA: Finish readHexFile()\n";
 }
 
 void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_data &mtd)
 {
+    std::cout << "CTA: assignMetadata, metadata size="<< metadata.size() <<"\n";
+
     int index = 0;
 
     mtd.kernel_id = metadata[index++];
@@ -106,6 +109,8 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
     {
         mtd.buffer_size[i] = metadata[index++];
     }
+
+    std::cout << "CTA: Finish assignMetadata()\n";
 }
 
 void CTA_Scheduler::freeMetadata(meta_data &mtd)

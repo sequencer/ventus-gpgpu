@@ -10,7 +10,7 @@ Please scroll down for the English version of README.
 
 配置systemc可以参考我的[博文](https://zhuanlan.zhihu.com/p/638360098)（也参考了很多别人的经验，但这篇比较适合本工程）。
 
-主程序目前在 sc-code/sm 中，在sm文件夹下运行【make GPGPU_test】编译程序，运行【./BASE --inssrc imem --metafile vecadd/vecadd.riscv.meta --datafile vecadd/vecadd.riscv.data】来获取输出结果。
+主程序目前在 sc-code/sm 中，在sm文件夹下运行【make GPGPU_test】编译程序，运行【./ventus --inssrc imem --metafile vecadd/vecadd.riscv.meta --datafile vecadd/vecadd.riscv.data】来获取输出结果。
 
 ---
 
