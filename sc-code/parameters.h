@@ -8,10 +8,10 @@
 #include <queue>
 #include <stack>
 #include <map>
+#include <bit>
 #include <bitset>
 #include <math.h>
 #include <iostream>
-#include <bitset>
 #include <unordered_map>
 #include "magic_enum.hpp"
 

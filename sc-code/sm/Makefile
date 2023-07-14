@@ -1,16 +1,33 @@
-LIB_DIR=-L /home/lan/utils/systemc-2.3.4/lib-linux64/
-INC_DIR=-I /home/lan/utils/systemc-2.3.4/include/
-LIB=-lsystemc -Wl,-rpath,/home/lan/utils/systemc-2.3.4/lib-linux64/
+LIB_DIR=-L$(SYSTEMC_HOME)/lib-linux64
+INC_DIR=-I$(SYSTEMC_HOME)/include
+LIB=-lsystemc -Wl,-rpath,$(SYSTEMC_HOME)/lib-linux64
 
-App=BASE
+# 检查默认 g++ 版本是否大于等于 11
+GCC_VERSION := $(shell g++ -dumpversion)
+GE_GCC_11 := $(shell expr $(GCC_VERSION) \>= 11)
+# 设置 g++ 路径
+ifeq ($(GE_GCC_11), 1)
+    # 默认 g++ 版本大于等于 11，直接使用 g++
+    GCC := g++
+else
+    # 默认 g++ 版本小于 11，使用指定路径下的 g++
+    GCC_PATH := $(GCC11_PATH)
+    GCC := $(GCC_PATH)/bin/g++ -L$(GCC_PATH)/lib64 -I$(GCC_PATH)/include -Wl,-rpath,$(GCC_PATH)/lib64
+endif
+
+App=ventus
 
 .PHONY:BASE_test GPGPU_test
+
+all: GPGPU_test
 
 BASE_test:
 	g++ -o $(App) BASE_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
 
+GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp
+
 GPGPU_test:
-	g++ -o $(App) GPGPU_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
+	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
 
 clean:                                                                                                           
 	RM -RF $(App)

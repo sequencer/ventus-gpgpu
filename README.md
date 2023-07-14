@@ -1,4 +1,10 @@
-Please scroll down for the English version of the readme.
+Requirements:
+
+- GCC version >= 11  
+- enable C++20 support
+- to use the latest release of SystemC is highly recommended
+
+Please scroll down for the English version of README.
 
 ---
 
@@ -8,6 +14,6 @@ Please scroll down for the English version of the readme.
 
 ---
 
-To configure systemc, you can refer to my [blog post](https://zhuanlan.zhihu.com/p/638360098) (I also refer to the experience of many others, but this article is more suitable for this project).
+To configure systemc, you can refer to my [blog post](https://zhuanlan.zhihu.com/p/638360098) (I also referred to the experience of many others, but this one is more suitable for this project).
 
-The main program is currently in sc-code/sm, run [make GPGPU_test] to compile the program under the sm folder, and run [./BASE --inssrc imem --metafile vecadd/vecadd.riscv.meta --datafile vecadd/vecadd. riscv.data] to get the output.
+The main program is currently in sc-code/sm, run [make] to compile the program under the sm folder, and run [./ventus --inssrc imem --metafile vecadd/vecadd.riscv.meta --datafile vecadd/vecadd. riscv.data] to get the output.
