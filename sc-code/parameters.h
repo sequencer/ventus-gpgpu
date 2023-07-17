@@ -12,6 +12,7 @@
 #include <bitset>
 #include <math.h>
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 #include "magic_enum.hpp"
 
@@ -1651,5 +1652,33 @@ struct meta_data
 };
 
 uint32_t extractBits32(uint32_t number, int start, int end);
+
+template <typename T, std::size_t N, std::size_t... Is>
+void printArrayHelper(const std::array<T, N> &arr, std::index_sequence<Is...>)
+{
+    std::cout << '(';
+    ((std::cout << arr[Is] << (Is != N - 1 ? "," : "")), ...);
+    std::cout << ")\n";
+}
+template <typename T, std::size_t N>
+void printArray(const std::array<T, N> &arr)
+{
+    printArrayHelper(arr, std::make_index_sequence<N>{});
+}
+
+template <typename T, std::size_t N, std::size_t... Is>
+void coutArrayHelper(std::ostringstream &oss, const std::array<T, N> &arr, std::index_sequence<Is...>)
+{
+    ((oss << (Is != 0 ? "," : "") << arr[Is]), ...);
+}
+template <typename T, std::size_t N>
+std::string coutArray(const std::array<T, N> &arr)
+{
+    std::ostringstream oss;
+    oss << '(';
+    coutArrayHelper(oss, arr, std::make_index_sequence<N>{});
+    oss << ')';
+    return oss.str();
+}
 
 #endif

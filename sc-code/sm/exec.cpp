@@ -527,6 +527,11 @@ void BASE::VALU_CALC()
                             valutmp2.rdv1_data[i] = valutmp1.rsv2_data[i] - valutmp1.rsv1_data[i];
                     }
                 break;
+            case DecodeParams::FN_VID:
+                // VID.V
+                for (int i = 0; i < num_thread; i++)
+                    valutmp2.rdv1_data[i] = i;
+                break;
 
             default:
                 cout << "VALU_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";

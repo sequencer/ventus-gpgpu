@@ -6,7 +6,7 @@
 int sc_main(int argc, char *argv[])
 {
     // 处理命令行参数
-    std::string inssrc, metafile, datafile;
+    std::string inssrc, metafile, datafile, numcycle;
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "--inssrc") == 0)
@@ -24,8 +24,13 @@ int sc_main(int argc, char *argv[])
             datafile = argv[i + 1];
             i++;
         }
+        if (strcmp(argv[i], "--numcycle") == 0)
+        {
+            numcycle = argv[i + 1];
+            i++;
+        }
     }
-    std::cout << "Finish reading runtime args, "<< argc <<" args found\n";
+    std::cout << "Finish reading runtime args, " << argc << " args found\n";
 
     std::cout << "----------Initializing SM data-structures----------\n";
     BASE **BASE_impl;
@@ -167,7 +172,7 @@ int sc_main(int argc, char *argv[])
 
     std::cout << "----------Simulation start----------\n";
     auto start = std::chrono::high_resolution_clock::now();
-    sc_start(3000, SC_NS);
+    sc_start(std::stoi(numcycle), SC_NS);
 
     for (auto tf_ : tf)
         sc_close_vcd_trace_file(tf_);

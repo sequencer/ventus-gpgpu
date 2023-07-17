@@ -29,5 +29,5 @@ GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.c
 GPGPU_test:
 	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
 
-clean:                                                                                                           
+clean:
 	RM -RF $(App)

@@ -104,10 +104,13 @@ void BASE::INSTRUCTION_REG(int warp_id)
         if (WARPS[warp_id]->is_warp_activated)
         {
             if (WARPS[warp_id]->jump == 1 |
-                WARPS[warp_id]->simtstk_jump == 1 |
-                WARPS[warp_id]->ibuf_empty |
-                (!WARPS[warp_id]->ibuf_full |
-                 (WARPS[warp_id]->dispatch_warp_valid && (!opc_full | doemit))))
+                WARPS[warp_id]->simtstk_jump == 1)
+            {
+                WARPS[warp_id]->fetch_valid2 = false;
+            }
+            else if (WARPS[warp_id]->ibuf_empty |
+                     (!WARPS[warp_id]->ibuf_full |
+                      (WARPS[warp_id]->dispatch_warp_valid && (!opc_full | doemit))))
             {
                 WARPS[warp_id]->fetch_valid2 = WARPS[warp_id]->fetch_valid;
                 if (inssrc == "ireg")
@@ -126,7 +129,9 @@ void BASE::INSTRUCTION_REG(int warp_id)
                         (WARPS[warp_id]->pc.read() >= 0)
                             ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read()) / 4])
                             : I_TYPE(INVALID_, 0, 0, 0);
-                    // cout << "ICACHE: ins_mem[" << std::dec << WARPS[warp_id]->pc.read() / 4 << "]=" << std::hex << ins_mem[WARPS[warp_id]->pc.read() / 4] << ", fetch_ins.bit=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec << "\n";
+                    if (sm_id == 0 && warp_id == 0)
+                        cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << WARPS[warp_id]->pc.read() / 4 << "]=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec
+                             << ", will pass to decode_ins at the same cycle at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: finish fetch_ins pc=" << WARPS[warp_id]->pc.read() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
 
@@ -134,17 +139,6 @@ void BASE::INSTRUCTION_REG(int warp_id)
                     cout << "ICACHE error: unrecognized param inssrc=" << inssrc << "\n";
                 WARPS[warp_id]->ev_decode.notify();
             }
-
-            // if (WARPS[warp_id]->ibuf_full)
-            //     if (sm_id == 0 && warp_id == 0)
-            //         cout << "SM" << sm_id << " warp" << warp_id << " ibuf_full=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-
-            // cout << "pc=" << pc << ", fetch_ins is " << fetch_ins << " at " << sc_time_stamp()
-            //      << ", it will be " << ireg[pc.read()] << " at the next timestamp"
-            //      << "\n";
-
-            // wait(WARPS[warp_id]->pc.value_changed_event());
-            // cout << "pc.value_changed_event() triggered\n";
         }
     }
 }
@@ -166,7 +160,7 @@ void BASE::DECODE(int warp_id)
             // WARPS[warp_id]->ev_kernel_ret.notify();
 
             cout << "SM" << sm_id << " warp" << warp_id << " DECODE find ins ret and notify ev_kernel_ret at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            break;
+            // break;
         }
         if (inssrc == "imem")
         {
@@ -195,29 +189,33 @@ void BASE::DECODE(int warp_id)
         }
         tmpins.ddd = decode_table[(OP_TYPE)tmpins.op];
         // tmpins.ddd.mem = (tmpins.ddd.mem_cmd & 1) | ((tmpins.ddd.mem_cmd) >> 1 & 1);
-        if (WARPS[warp_id]->fetch_ins.ddd.tc)
+        if (tmpins.ddd.tc)
             tmpins.ddd.sel_execunit = DecodeParams::TC;
-        else if (WARPS[warp_id]->fetch_ins.ddd.sfu)
+        else if (tmpins.ddd.sfu)
             tmpins.ddd.sel_execunit = DecodeParams::SFU;
-        else if (WARPS[warp_id]->fetch_ins.ddd.fp)
+        else if (tmpins.ddd.fp)
             tmpins.ddd.sel_execunit = DecodeParams::VFPU;
-        else if (WARPS[warp_id]->fetch_ins.ddd.csr != 0)
+        else if (tmpins.ddd.csr != 0)
             tmpins.ddd.sel_execunit = DecodeParams::CSR;
-        else if (WARPS[warp_id]->fetch_ins.ddd.mul)
+        else if (tmpins.ddd.mul)
             tmpins.ddd.sel_execunit = DecodeParams::MUL;
-        else if (WARPS[warp_id]->fetch_ins.ddd.mem_cmd != 0)
+        else if (tmpins.ddd.mem_cmd != 0)
             tmpins.ddd.sel_execunit = DecodeParams::LSU;
-        else if (WARPS[warp_id]->fetch_ins.ddd.isvec)
+        else if (tmpins.ddd.isvec)
         {
-            if (WARPS[warp_id]->fetch_ins.op == JOIN_)
+            if (tmpins.op == JOIN_)
                 tmpins.ddd.sel_execunit = DecodeParams::SIMTSTK;
             else
                 tmpins.ddd.sel_execunit = DecodeParams::VALU;
         }
-        else if (WARPS[warp_id]->fetch_ins.ddd.barrier)
+        else if (tmpins.ddd.barrier)
             tmpins.ddd.sel_execunit = DecodeParams::WPSCHEDLER;
         else
             tmpins.ddd.sel_execunit = DecodeParams::SALU;
+
+        if (sm_id == 0 && warp_id == 0 && tmpins.origin32bit == (uint32_t)0x5208a157)
+            cout << "SM" << sm_id << " warp" << warp_id << " DECODE: decoding ins " << std::hex << tmpins.origin32bit << std::dec
+                 << ", isvec=" << WARPS[warp_id]->fetch_ins.ddd.isvec << ", sel_execunit=" << magic_enum::enum_name(tmpins.ddd.sel_execunit) << "\n";
 
         tmpins.s1 = extractBits32(tmpins.origin32bit, 19, 15);
         tmpins.s2 = extractBits32(tmpins.origin32bit, 24, 20);
@@ -291,7 +289,7 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         {
             // cout << "IBUF: dispatch == false at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
         }
-        if (WARPS[warp_id]->fetch_valid2 && WARPS[warp_id]->jump == false)
+        if (WARPS[warp_id]->fetch_valid2 && WARPS[warp_id]->jump == false && WARPS[warp_id]->simtstk_jump == false)
         {
             if (WARPS[warp_id]->ififo.isfull())
             {
@@ -302,7 +300,7 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
                 WARPS[warp_id]->ififo.push(WARPS[warp_id]->decode_ins.read());
                 WARPS[warp_id]->ibuf_swallow = true;
                 if (sm_id == 0 && warp_id == 0)
-                    cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push decode_ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             // cout << "before put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             // cout << "after put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
@@ -507,6 +505,10 @@ void BASE::BEFORE_DISPATCH(int warp_id)
         wait(ev_warp_assigned);
         if (WARPS[warp_id]->is_warp_activated)
         {
+            if (sm_id == 0 && warp_id == 0)
+                cout << "SM" << sm_id << " warp" << warp_id << " before action, fetch_valid2=" << WARPS[warp_id]->fetch_valid2 << ", decode_ins=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit
+                     << std::dec << ", jump=" << WARPS[warp_id]->jump << ", ififo.isfull=" << WARPS[warp_id]->ififo.isfull() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
             cycle_IBUF_ACTION(warp_id, dispatch_ins_, _readdata3);
             cycle_UPDATE_SCORE(warp_id, tmpins, it, regtype_, insertscore);
             cycle_JUDGE_DISPATCH(warp_id, _readibuf);
@@ -759,6 +761,11 @@ void BASE::OPC_FIFO()
                 // opcfifo.push(opcfifo_t(_readdata4, _readwarpid,
                 //                        in_ready, in_valid, in_srcaddr, in_banktype));
                 opcfifo.push(newopcdat);
+
+                if (sm_id == 0 && _readdata4.origin32bit == (uint32_t)0x5208a157)
+                    cout << "SM" << sm_id << " OPC: receive dispatch ins " << std::hex << _readdata4.origin32bit << std::dec
+                         << ", in_ready=" << coutArray(in_ready) << ", in_valid=" << coutArray(in_valid)
+                         << ", sel_execunit=" << magic_enum::enum_name(_readdata4.ddd.sel_execunit) << "\n";
             }
         }
         opcfifo_elem_num = opcfifo.get_size();
@@ -865,6 +872,9 @@ void BASE::OPC_EMIT()
                         // else if (opcfifo[entryidx].ins.ddd.sel_alu2 == DecodeParams::A2_RS2 |
                         //          opcfifo[entryidx].ins.ddd.sel_alu2 == DecodeParams::A2_IMM)
                         //     tovalu_data2[0] = opcfifo[entryidx].data[1][0];
+
+                        if (sm_id == 0 && opcfifo[entryidx].ins.origin32bit == (uint32_t)0x5208a157)
+                            cout << "SM" << sm_id << " OPC: will emit ins " << std::hex << opcfifo[entryidx].ins.origin32bit << std::dec << "\n";
                     }
                     break;
 
@@ -922,11 +932,27 @@ void BASE::OPC_EMIT()
                             tolsu_data2[0] = opcfifo[entryidx].data[1][0];
                     }
                     break;
+
+                case DecodeParams::CSR:
+                    if (csr_ready)
+                    {
+                        emit_idx = entryidx;
+                        last_emit_entryid = entryidx + 1;
+                        findemit = 1;
+                        doemit = true;
+                        emito_csr = true;
+                        tocsr_data1 = opcfifo[entryidx].data[0][0];
+                        tocsr_data2 = opcfifo[entryidx].data[1][0];
+                    }
+                    break;
+
                 case DecodeParams::INVALID_EXECUNIT:
-                    cout << "OPC_EMIT error: ins=" << opcfifo[entryidx].ins << "but INVALID EXECUNIT at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " OPC_EMIT error: ins=" << opcfifo[entryidx].ins << "," << std::hex << opcfifo[entryidx].ins.origin32bit << std::dec
+                         << " but INVALID EXECUNIT at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     break;
                 default:
-                    cout << "OPC_EMIT warning: ins=" << opcfifo[entryidx].ins << "but undefined EXECUNIT at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " OPC_EMIT warning: ins=" << opcfifo[entryidx].ins << "," << std::hex << opcfifo[entryidx].ins.origin32bit << std::dec
+                         << " but undefined EXECUNIT at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     break;
                 }
             }
@@ -1057,6 +1083,13 @@ void BASE::WRITE_BACK()
             vfpufifo.pop();
         if (execpop_lsu)
             lsufifo.pop();
+        if (execpop_csr)
+            csrfifo.pop();
+        if (execpop_mul)
+            mulfifo.pop();
+        if (execpop_sfu)
+            sfufifo.pop();
+
         salufifo_empty = salufifo.isempty();
         if (!salufifo_empty)
             salutop_dat = salufifo.front();
@@ -1073,17 +1106,33 @@ void BASE::WRITE_BACK()
         if (!lsufifo_empty)
             lsutop_dat = lsufifo.front();
         lsufifo_elem_num = lsufifo.used();
+        csrfifo_empty = csrfifo.isempty();
+        if (!csrfifo_empty)
+            csrtop_dat = csrfifo.front();
+        csrfifo_elem_num = csrfifo.used();
+        mulfifo_empty = mulfifo.isempty();
+        if (!mulfifo_empty)
+            multop_dat = mulfifo.front();
+        mulfifo_elem_num = mulfifo.used();
+        sfufifo_empty = sfufifo.isempty();
+        if (!sfufifo_empty)
+            sfutop_dat = sfufifo.front();
+        sfufifo_elem_num = sfufifo.used();
+
+        execpop_valu = false;
+        execpop_salu = false;
+        execpop_vfpu = false;
+        execpop_lsu = false;
+        execpop_csr = false;
+        execpop_mul = false;
+        execpop_sfu = false;
 
         if (salufifo_empty == false)
         {
             write_s = true;
             write_v = false;
-            // write_f = false;
             wb_ena = true;
             execpop_salu = true;
-            execpop_lsu = false;
-            execpop_valu = false;
-            execpop_vfpu = false;
             // cout << "do write_s=true at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             wb_ins = salutop_dat.ins;
             rds1_addr = salutop_dat.ins.d;
@@ -1094,12 +1143,8 @@ void BASE::WRITE_BACK()
         {
             write_v = true;
             write_s = false;
-            // write_f = false;
             wb_ena = true;
             execpop_valu = true;
-            execpop_salu = false;
-            execpop_vfpu = false;
-            execpop_lsu = false;
             wb_ins = valutop_dat.ins;
             rdv1_addr = valutop_dat.ins.d;
             for (int i = 0; i < num_thread; i++)
@@ -1110,12 +1155,8 @@ void BASE::WRITE_BACK()
         }
         else if (vfpufifo_empty == false)
         {
-            // write_f = true;
             wb_ena = true;
             execpop_vfpu = true;
-            execpop_salu = false;
-            execpop_valu = false;
-            execpop_lsu = false;
             wb_ins = vfputop_dat.ins;
             if (vfputop_dat.ins.ddd.wxd) // FEQ_S_等指令
             {
@@ -1143,15 +1184,11 @@ void BASE::WRITE_BACK()
         else if (lsufifo_empty == false)
         {
             execpop_lsu = true;
-            execpop_salu = false;
-            execpop_valu = false;
-            execpop_vfpu = false;
             switch (lsutop_dat.ins.op)
             {
             case LW_:
                 write_s = true;
                 write_v = false;
-                write_f = false;
                 wb_ena = true;
                 wb_ins = lsutop_dat.ins;
                 rds1_addr = lsutop_dat.ins.d;
@@ -1161,7 +1198,6 @@ void BASE::WRITE_BACK()
             case VLE32_V_:
                 write_v = true;
                 write_s = false;
-                write_f = false;
                 wb_ena = true;
                 wb_ins = lsutop_dat.ins;
                 rdv1_addr = lsutop_dat.ins.d;
@@ -1176,16 +1212,33 @@ void BASE::WRITE_BACK()
             }
             wb_warpid = lsutop_dat.warp_id;
         }
+        else if (csrfifo_empty == false)
+        {
+            write_s = true;
+            write_v = false;
+            wb_ena = true;
+            execpop_csr = true;
+            wb_ins = csrtop_dat.ins;
+            rds1_addr = csrtop_dat.ins.d;
+            rds1_data = csrtop_dat.data;
+            wb_warpid = csrtop_dat.warp_id;
+        }        else if (mulfifo_empty == false)
+        {
+            if(){}
+            write_s = true;
+            write_v = false;
+            wb_ena = true;
+            execpop_csr = true;
+            wb_ins = csrtop_dat.ins;
+            rds1_addr = csrtop_dat.ins.d;
+            rds1_data = csrtop_dat.data;
+            wb_warpid = csrtop_dat.warp_id;
+        }
         else
         {
             write_s = false;
             write_v = false;
-            write_f = false;
             wb_ena = false;
-            execpop_salu = false;
-            execpop_valu = false;
-            execpop_vfpu = false;
-            execpop_lsu = false;
         }
     }
 }
@@ -1202,15 +1255,15 @@ void BASE::WRITE_REG(int warp_id)
             // 后续regfile要一次只能写一个，否则报错
             if (write_s)
             {
-                cout << "SM" << sm_id << " WRITE_REG ins" << wb_ins << "warp" << warp_id << ": scalar, s_regfile[" << rds1_addr.read() << "]="
-                     << std::hex << rds1_data << std::dec
+                cout << "SM" << sm_id << " warp" << warp_id << " WRITE_REG ins" << wb_ins << "," << std::hex << wb_ins.read().origin32bit
+                     << ": scalar, s_regfile[" << rds1_addr.read() << "]=" << rds1_data << std::dec
                      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 WARPS[warp_id]->s_regfile[rds1_addr.read()] = rds1_data;
             }
             if (write_v)
             {
-                cout << "WRITE_REG ins" << wb_ins << "warp" << warp_id << ": vector, v_regfile[" << rdv1_addr.read() << "]={"
-                     << std::hex
+                cout << "SM" << sm_id << " warp" << warp_id << "WRITE_REG ins" << wb_ins << "," << std::hex << wb_ins.read().origin32bit
+                     << ": vector, v_regfile[" << rdv1_addr.read() << "]={"
                      << rdv1_data[0] << "," << rdv1_data[1] << "," << rdv1_data[2] << "," << rdv1_data[3] << ","
                      << rdv1_data[4] << "," << rdv1_data[5] << "," << rdv1_data[6] << "," << rdv1_data[7]
                      << std::dec
@@ -1219,23 +1272,6 @@ void BASE::WRITE_REG(int warp_id)
                     if (wb_ins.read().mask[i] == 1)
                         WARPS[warp_id]->v_regfile[rdv1_addr.read()][i] = rdv1_data[i];
             }
-            // if (write_f)
-            // {
-            //     cout << "WRITE_REG ins" << wb_ins << "warp" << warp_id << ": float, v_regfile[" << rdf1_addr.read() << "]={"
-            //          << std::hex
-            //          << rdf1_data[0].read() << "," << rdf1_data[1].read() << "," << rdf1_data[2].read() << "," << rdf1_data[3].read() << ","
-            //          << rdf1_data[4].read() << "," << rdf1_data[5].read() << "," << rdf1_data[6].read() << "," << rdf1_data[7].read()
-            //          << std::dec
-            //          << "}, mask=" << wb_ins.read().mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            //     for (int i = 0; i < num_thread; i++)
-            //     {
-            //         // f1 = rdf1_data[i];
-            //         // pa1 = &f1;
-            //         // WARPS[warp_id]->v_regfile[rdf1_addr.read()][i] = *(reg_t *)(pa1);
-            //         if (wb_ins.read().mask[i] == 1)
-            //             WARPS[warp_id]->v_regfile[rdf1_addr.read()][i] = rdf1_data[i].read();
-            //     }
-            // }
         }
     }
 }

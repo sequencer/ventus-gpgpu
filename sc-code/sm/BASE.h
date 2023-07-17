@@ -258,6 +258,7 @@ public:
     salu_in_t salutmp1;
     salu_out_t salutmp2;
     sc_signal<bool> salueqa_triggered, salueqb_triggered; // 例如eqa_triggered，仅在eqa被触发时，delta 0变为1，delta 1给SALU_IN看，同时又变回0
+    sc_signal<bool> execpop_salu;
 
     sc_signal<bool> emito_valu{"emito_valu"};
     sc_vector<sc_signal<reg_t>> tovalu_data1{"tovalu_data1", num_thread}, // OPC TO VALU
@@ -273,6 +274,7 @@ public:
     bool valufifo_empty, valufifo_push;
     int valufifo_elem_num;
     sc_signal<bool> valueqa_triggered, valueqb_triggered;
+    sc_signal<bool> execpop_valu;
 
     sc_signal<bool> emito_vfpu{"emito_vfpu"};
     sc_vector<sc_signal<int32_t>> tovfpu_data1{"tovfpu_data1", num_thread}, // OPC TO VFPU
@@ -288,6 +290,7 @@ public:
     bool vfpufifo_empty, vfpufifo_push;
     int vfpufifo_elem_num;
     sc_signal<bool> vfpueqa_triggered, vfpueqb_triggered;
+    sc_signal<bool> execpop_vfpu;
 
     sc_signal<bool> emito_lsu{"emito_lsu"};
     sc_vector<sc_signal<int32_t>> tolsu_data1{"emitolsu_data1", num_thread}, // OPC TO LSU
@@ -303,6 +306,7 @@ public:
     bool lsufifo_empty;
     int lsufifo_elem_num;
     sc_signal<bool> lsueqa_triggered, lsueqb_triggered;
+    sc_signal<bool> execpop_lsu;
 
     sc_signal<bool> emito_simtstk{"emito_simtstk"};                    // 对应join，由于wait_bran的存在，这两个不会同时为1
     sc_signal<bool, SC_MANY_WRITERS> valuto_simtstk{"valuto_simtstk"}; // 对应beq类，由于wait_bran的存在，这两个不会同时为1
@@ -322,11 +326,12 @@ public:
     sc_event csr_eva, csr_evb, csr_unready, csr_nothinghappen,
         ev_csrfifo_pushed, ev_csrready_updated;
     std::queue<csr_in_t> csr_dq;
-    StaticQueue<csr_out_t, 10> csrfifo;
+    StaticQueue<csr_out_t, 100> csrfifo;
     csr_out_t csrtop_dat;
     bool csrfifo_empty;
     int csrfifo_elem_num;
     sc_signal<bool> csreqa_triggered, csreqb_triggered;
+    sc_signal<bool> execpop_csr;
 
     sc_signal<bool> emito_mul{"emito_mul"};
     sc_vector<sc_signal<reg_t>> tomul_data1{"tomul_data1", num_thread},
@@ -342,6 +347,7 @@ public:
     bool mulfifo_empty, mulfifo_push;
     int mulfifo_elem_num;
     sc_signal<bool> muleqa_triggered, muleqb_triggered;
+    sc_signal<bool> execpop_mul;
 
     sc_signal<bool> emito_sfu{"emito_sfu"};
     sc_vector<sc_signal<reg_t>> tosfu_data1{"tosfu_data1", num_thread},
@@ -357,10 +363,10 @@ public:
     bool sfufifo_empty, sfufifo_push;
     int sfufifo_elem_num;
     sc_signal<bool> sfueqa_triggered, sfueqb_triggered;
+    sc_signal<bool> execpop_sfu;
 
     // writeback
     sc_signal<bool> write_s, write_v, write_f;
-    sc_signal<bool> execpop_salu, execpop_valu, execpop_vfpu, execpop_lsu;
     sc_signal<I_TYPE> wb_ins{"wb_ins"};
     sc_signal<int> wb_warpid{"wb_warpid"};
     sc_signal<bool> wb_ena{"wb_ena"};
