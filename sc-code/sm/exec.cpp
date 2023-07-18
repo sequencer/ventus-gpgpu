@@ -638,70 +638,6 @@ void BASE::VFPU_IN()
             a_delay = 5;
             b_delay = 1;
 
-            // switch (emit_ins.read().op)
-            // {
-
-            // case FSQRT_S_:
-            // case FCVT_W_S_:
-            // case FCVT_WU_S_:
-            // case FCLASS_S_:
-            //     new_data.rsf1_data[0] = std::bit_cast<float>(tovfpu_data1[0].read());
-            //     vfpu_dq.push(new_data);
-            //     a_delay = 5;
-            //     b_delay = 1;
-            //     break;
-            // case FCVT_S_W_:
-            // case FCVT_S_WU_:
-            //     new_data.rss1_data = tovfpu_data1[0];
-            //     vfpu_dq.push(new_data);
-            //     a_delay = 5;
-            //     b_delay = 1;
-            //     break;
-            // case FMADD_S_:
-            // case FMSUB_S_:
-            // case FNMSUB_S_:
-            // case FNMADD_S_:
-            //     new_data.rsf1_data[0] = std::bit_cast<float>(tovfpu_data1[0].read());
-            //     new_data.rsf2_data[0] = std::bit_cast<float>(tovfpu_data2[0].read());
-            //     new_data.rsf3_data[0] = std::bit_cast<float>(tovfpu_data3[0].read());
-            //     vfpu_dq.push(new_data);
-            //     a_delay = 5;
-            //     b_delay = 1;
-            //     break;
-            // case FADD_S_:
-            // case FSUB_S_:
-            // case FMUL_S_:
-            // case FDIV_S_:
-            // case FSGNJ_S_:
-            // case FSGNJN_S_:
-            // case FSGNJX_S_:
-            // case FMIN_S_:
-            // case FMAX_S_:
-            // case FEQ_S_:
-            // case FLT_S_:
-            // case FLE_S_:
-            //     new_data.rsf1_data[0] = std::bit_cast<float>(tovfpu_data1[0].read());
-            //     new_data.rsf2_data[0] = std::bit_cast<float>(tovfpu_data2[0].read());
-            //     vfpu_dq.push(new_data);
-            //     a_delay = 5;
-            //     b_delay = 1;
-            //     break;
-            // case VFADD_VV_:
-            //     // cout << "VFPU_IN: receive ins" << emit_ins << "warp" << emitins_warpid << ", rs1_data={";
-            //     for (int i = 0; i < num_thread; i++)
-            //         new_data.rsf1_data[i] = std::bit_cast<float>(tovfpu_data1[i].read());
-            //     // cout << "}, rs2_data={";
-            //     for (int i = 0; i < num_thread; i++)
-            //         new_data.rsf2_data[i] = std::bit_cast<float>(tovfpu_data2[i].read());
-            //     // cout << "}, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            //     vfpu_dq.push(new_data);
-            //     a_delay = 5;
-            //     b_delay = 1;
-            //     break;
-            // default:
-            //     cout << "vfpu error: receive wrong ins " << emit_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            // }
-
             if (a_delay == 0)
                 vfpu_eva.notify();
             else if (vfpueqa_triggered)
@@ -1249,6 +1185,8 @@ void BASE::CSR_IN()
                 new_data.csrSdata2 = tocsr_data2;
 
             csr_dq.push(new_data);
+            if (sm_id == 0)
+                cout << "SM" << sm_id << " CSR dataqueue push ins=" << new_data.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             a_delay = 0;
             b_delay = 0;
 
@@ -1338,6 +1276,8 @@ void BASE::CSR_CALC()
                 break;
             }
             csrfifo.push(csrtmp2);
+            if (sm_id == 0)
+                cout << "SM" << sm_id << " CSRfifo push data ins=" << csrtmp2.ins << ", csrfifo's elem_num now is " << csrfifo.used() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         }
         else
         {

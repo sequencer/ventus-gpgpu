@@ -326,7 +326,7 @@ public:
     sc_event csr_eva, csr_evb, csr_unready, csr_nothinghappen,
         ev_csrfifo_pushed, ev_csrready_updated;
     std::queue<csr_in_t> csr_dq;
-    StaticQueue<csr_out_t, 100> csrfifo;
+    StaticQueue<csr_out_t, 10> csrfifo;
     csr_out_t csrtop_dat;
     bool csrfifo_empty;
     int csrfifo_elem_num;
