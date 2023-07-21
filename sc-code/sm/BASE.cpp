@@ -129,9 +129,9 @@ void BASE::INSTRUCTION_REG(int warp_id)
                         (WARPS[warp_id]->pc.read() >= 0)
                             ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read()) / 4])
                             : I_TYPE(INVALID_, 0, 0, 0);
-                    if (sm_id == 0 && warp_id == 0)
-                        cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << WARPS[warp_id]->pc.read() / 4 << "]=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec
-                             << ", will pass to decode_ins at the same cycle at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    // if (sm_id == 0 && warp_id == 0)
+                    //     cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << WARPS[warp_id]->pc.read() / 4 << "]=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec
+                    //          << ", will pass to decode_ins at the same cycle at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: finish fetch_ins pc=" << WARPS[warp_id]->pc.read() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
 
@@ -276,13 +276,13 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         {
             // cout << "before dispatch, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             dispatch_ins_ = WARPS[warp_id]->ififo.get();
-            if (sm_id == 0 && warp_id == 0)
-            {
-                if (!WARPS[warp_id]->ififo.isempty())
-                    cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf.top become " << WARPS[warp_id]->ififo.front().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                else
-                    cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf become empty at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            }
+            // if (sm_id == 0 && warp_id == 0)
+            // {
+            //     if (!WARPS[warp_id]->ififo.isempty())
+            //         cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf.top become " << WARPS[warp_id]->ififo.front().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            //     else
+            //         cout << "SM" << sm_id << " warp" << warp_id << " IBUF dispatch ins.bit=" << std::hex << dispatch_ins_.origin32bit << ", and ibuf become empty at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // }
             // cout << "IBUF: after dispatch, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
         }
         else
@@ -299,8 +299,8 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
             {
                 WARPS[warp_id]->ififo.push(WARPS[warp_id]->decode_ins.read());
                 WARPS[warp_id]->ibuf_swallow = true;
-                if (sm_id == 0 && warp_id == 0)
-                    cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push decode_ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                // if (sm_id == 0 && warp_id == 0)
+                //     cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push decode_ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             // cout << "before put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
             // cout << "after put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
@@ -324,8 +324,8 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         WARPS[warp_id]->ififo_elem_num = WARPS[warp_id]->ififo.used();
         // cout << "ififo has " << ififo.used() << " elems in it at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
     }
-    if (sm_id == 0 && warp_id == 0)
-        cout << "SM" << sm_id << " warp" << warp_id << " IBUF ififo_elem_num=" << WARPS[warp_id]->ififo_elem_num << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+    // if (sm_id == 0 && warp_id == 0)
+    //     cout << "SM" << sm_id << " warp" << warp_id << " IBUF ififo_elem_num=" << WARPS[warp_id]->ififo_elem_num << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 }
 
 void BASE::IBUF_ACTION(int warp_id)
@@ -469,8 +469,8 @@ void BASE::cycle_JUDGE_DISPATCH(int warp_id, I_TYPE &_readibuf)
         //         cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH=false with ins.bit=" << std::hex << _readibuf.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
         // if (sm_id == 0 && warp_id == 0 && _readibuf.origin32bit == uint32_t(0x96013057) && WARPS[warp_id]->can_dispatch == false)
-        if (sm_id == 0 && warp_id == 0 && WARPS[warp_id]->can_dispatch == false)
-            cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH meet ins.bit=" << std::hex << _readibuf.origin32bit << std::dec << ", can't dispatch, ins.d=" << _readibuf.d << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        // if (sm_id == 0 && warp_id == 0 && WARPS[warp_id]->can_dispatch == false)
+        //     cout << "SM" << sm_id << " warp" << warp_id << " JUDGE_DISPATCH meet ins.bit=" << std::hex << _readibuf.origin32bit << std::dec << ", can't dispatch, ins.d=" << _readibuf.d << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
     }
 }
 
@@ -506,8 +506,8 @@ void BASE::BEFORE_DISPATCH(int warp_id)
         if (WARPS[warp_id]->is_warp_activated)
         {
             if (sm_id == 0 && warp_id == 0)
-                cout << "SM" << sm_id << " warp" << warp_id << " before action, fetch_valid2=" << WARPS[warp_id]->fetch_valid2 << ", decode_ins=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit
-                     << std::dec << ", jump=" << WARPS[warp_id]->jump << ", ififo.isfull=" << WARPS[warp_id]->ififo.isfull() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                // cout << "SM" << sm_id << " warp" << warp_id << " before action, fetch_valid2=" << WARPS[warp_id]->fetch_valid2 << ", decode_ins=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit
+                //      << std::dec << ", jump=" << WARPS[warp_id]->jump << ", ififo.isfull=" << WARPS[warp_id]->ififo.isfull() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             cycle_IBUF_ACTION(warp_id, dispatch_ins_, _readdata3);
             cycle_UPDATE_SCORE(warp_id, tmpins, it, regtype_, insertscore);
@@ -1113,13 +1113,13 @@ void BASE::WRITE_BACK()
     {
         wait(ev_salufifo_pushed & ev_valufifo_pushed & ev_vfpufifo_pushed &
              ev_lsufifo_pushed & ev_csrfifo_pushed & ev_mulfifo_pushed & ev_sfufifo_pushed);
-        if (sm_id == 0)
-            cout << "SM" << sm_id << " WRITEBACK: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        // if (sm_id == 0)
+        //     cout << "SM" << sm_id << " WRITEBACK: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         if (execpop_salu)
         {
             salufifo.pop();
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB pop salufifo at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB pop salufifo at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         }
         if (execpop_valu)
             valufifo.pop();
@@ -1173,8 +1173,8 @@ void BASE::WRITE_BACK()
 
         if (salufifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge popsalu, write_s=true, salutop.ins=" << salutop_dat.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge popsalu, write_s=true, salutop.ins=" << salutop_dat.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             write_s = true;
             write_v = false;
             wb_ena = true;
@@ -1186,8 +1186,8 @@ void BASE::WRITE_BACK()
         }
         else if (valufifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge popvalu, write_v=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge popvalu, write_v=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             write_s = false;
             write_v = true;
             wb_ena = true;
@@ -1207,8 +1207,8 @@ void BASE::WRITE_BACK()
             wb_ins = vfputop_dat.ins;
             if (vfputop_dat.ins.ddd.wxd) // FEQ_S_等指令
             {
-                if (sm_id == 0)
-                    cout << "SM" << sm_id << " WB judge popvfpu, write_s=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                // if (sm_id == 0)
+                //     cout << "SM" << sm_id << " WB judge popvfpu, write_s=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 write_s = true;
                 write_v = false;
                 rds1_addr = vfputop_dat.ins.d;
@@ -1216,8 +1216,8 @@ void BASE::WRITE_BACK()
             }
             else
             {
-                if (sm_id == 0)
-                    cout << "SM" << sm_id << " WB judge popvfpu, write_v=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                // if (sm_id == 0)
+                //     cout << "SM" << sm_id << " WB judge popvfpu, write_v=true at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 write_s = false;
                 write_v = true;
                 rdv1_addr = vfputop_dat.ins.d;
@@ -1234,8 +1234,8 @@ void BASE::WRITE_BACK()
         }
         else if (lsufifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge poplsu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge poplsu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             execpop_lsu = true;
             switch (lsutop_dat.ins.op)
             {
@@ -1267,8 +1267,8 @@ void BASE::WRITE_BACK()
         }
         else if (csrfifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge popcsr, write_s=true, csrtop.ins=" << csrtop_dat.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge popcsr, write_s=true, csrtop.ins=" << csrtop_dat.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             write_s = true;
             write_v = false;
             wb_ena = true;
@@ -1280,8 +1280,8 @@ void BASE::WRITE_BACK()
         }
         else if (mulfifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge popmul, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge popmul, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             wb_ena = true;
             execpop_mul = true;
             wb_ins = multop_dat.ins;
@@ -1306,8 +1306,8 @@ void BASE::WRITE_BACK()
         }
         else if (sfufifo_empty == false)
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge popsfu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge popsfu, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             wb_ena = true;
             execpop_sfu = true;
             wb_ins = sfutop_dat.ins;
@@ -1330,8 +1330,8 @@ void BASE::WRITE_BACK()
         }
         else
         {
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " WB judge not writeback, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " WB judge not writeback, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             write_s = false;
             write_v = false;
             wb_ena = false;

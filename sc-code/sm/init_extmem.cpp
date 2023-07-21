@@ -44,8 +44,9 @@ void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uin
 }
 
 // 通过虚拟地址获取对应缓冲区的数据并转换为整数
-uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size)
+uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException)
 {
+    addrOutofRangeException = 0;
     int bufferIndex = -1;
     for (int i = 0; i < num_buffer; i++)
     {
@@ -58,7 +59,8 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, i
 
     if (bufferIndex == -1)
     {
-        std::cerr << "No buffer found for the given virtual address." << std::endl;
+        std::cerr << "No buffer found for the given virtual address " << std::hex << virtualAddress << "\n";
+        addrOutofRangeException = 1;
         return 0;
     }
 

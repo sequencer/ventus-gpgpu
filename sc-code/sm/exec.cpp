@@ -251,6 +251,7 @@ void BASE::SALU_CALC()
         }
         else
         {
+            cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             switch (salutmp1.ins.ddd.alu_fn)
             {
             // case BEQ_:
@@ -964,6 +965,7 @@ void BASE::LSU_CALC()
     lsu_out_t lsutmp2;
     bool succeed;
     int external_addr;
+    bool addrOutofRangeException;
     while (true)
     {
         wait(lsu_eva | lsu_eqa.default_event());
@@ -994,8 +996,9 @@ void BASE::LSU_CALC()
             //      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             // lsutmp2.rds1_data = external_mem[external_addr];
-            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size);
-
+            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException);
+            if (addrOutofRangeException)
+                cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             lsufifo.push(lsutmp2);
             // cout << "LSU_CALC: lw, pushed " << lsutmp2.rds1_data << " to s_regfile rd=" << lsutmp1.ins.d << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             break;
@@ -1012,7 +1015,9 @@ void BASE::LSU_CALC()
             for (int i = 0; i < num_thread; i++)
             {
                 // lsutmp2.rdv1_data[i] = external_mem[lsutmp1.rss1_data / 4 + i - 128 * num_thread];
-                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size);
+                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException);
+                if (addrOutofRangeException)
+                    cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             lsufifo.push(lsutmp2);
             // cout << "LSU_CALC: pushed vle32v output at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
@@ -1185,8 +1190,8 @@ void BASE::CSR_IN()
                 new_data.csrSdata2 = tocsr_data2;
 
             csr_dq.push(new_data);
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " CSR dataqueue push ins=" << new_data.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            // cout << "SM" << sm_id << " CSR dataqueue push ins=" << new_data.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             a_delay = 0;
             b_delay = 0;
 
@@ -1276,8 +1281,8 @@ void BASE::CSR_CALC()
                 break;
             }
             csrfifo.push(csrtmp2);
-            if (sm_id == 0)
-                cout << "SM" << sm_id << " CSRfifo push data ins=" << csrtmp2.ins << ", csrfifo's elem_num now is " << csrfifo.used() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0)
+            //     cout << "SM" << sm_id << " CSRfifo push data ins=" << csrtmp2.ins << ", csrfifo's elem_num now is " << csrfifo.used() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         }
         else
         {
