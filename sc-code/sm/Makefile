@@ -21,10 +21,7 @@ App=ventus
 
 all: GPGPU_test
 
-BASE_test:
-	g++ -o $(App) BASE_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
-
-GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp exec.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp
+GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp exec.cpp opc.cpp decode.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp
 
 GPGPU_test:
 	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20

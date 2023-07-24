@@ -17,7 +17,7 @@ public:
     void debug_display3();
     void INIT_EXTMEM();
     void INIT_INSMEM();
-    uint32_t getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException);
+    uint32_t getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException, I_TYPE ins);
     void readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, uint64_t *buffer_size);
     void writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size);
     void activate_warp(int warp_id);

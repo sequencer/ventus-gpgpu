@@ -1,20 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Tue May 30 13:25:36 2023
+[*] Sun Jul 23 09:04:29 2023
 [*]
 [dumpfile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.vcd"
-[dumpfile_mtime] "Tue May 30 13:25:10 2023"
-[dumpfile_size] 45828
+[dumpfile_mtime] "Sun Jul 23 08:56:21 2023"
+[dumpfile_size] 145617
 [savefile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.gtkw"
-[timestart] 0
-[size] 1908 999
-[pos] -1889 390
-*-5.000000 25 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 175
+[size] 2548 1359
+[pos] 32768 33158
+*-5.000000 261 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] SystemC.
 [sst_width] 214
 [signals_width] 369
 [sst_expanded] 1
-[sst_vpaned_height] 279
+[sst_vpaned_height] 400
 @420
 SystemC.Clk
 SystemC.Rst_n
@@ -27,21 +27,9 @@ SystemC.vbran_sig
 SystemC.pc[31:0]
 @22
 [color] 1
-SystemC.fetch_ins.ins_bit[63:0]
-@420
-[color] 1
-SystemC.fetch_ins.op[31:0]
-[color] 1
-SystemC.fetch_ins.d[31:0]
-[color] 1
-SystemC.fetch_ins.s1[31:0]
-[color] 1
-SystemC.fetch_ins.s2[31:0]
-@22
-SystemC.decode_ins.ins_bit[63:0]
-@23
+SystemC.fetch_ins.ins_bit[31:0]
+SystemC.decode_ins.ins_bit[31:0]
 SystemC.decode_ins.op[31:0]
-@22
 SystemC.decode_ins.s1[31:0]
 SystemC.decode_ins.s2[31:0]
 @420
@@ -53,6 +41,10 @@ SystemC.ififo_elem_num[31:0]
 SystemC.ibuf_swallow
 [color] 3
 SystemC.ibuf_empty
+@22
+[color] 2
+SystemC.ibuftop_ins.ins_bit[31:0]
+@420
 [color] 2
 SystemC.ibuftop_ins.op[31:0]
 [color] 2
@@ -64,6 +56,10 @@ SystemC.ibuftop_ins.s2[31:0]
 SystemC.wait_bran
 [color] 3
 SystemC.can_dispatch
+@22
+[color] 7
+SystemC.issue_ins.ins_bit[31:0]
+@420
 [color] 7
 SystemC.issue_ins.op[31:0]
 [color] 7
@@ -90,6 +86,10 @@ SystemC.dispatch_ready
 SystemC.opc_full
 [color] 1
 SystemC.opcfifo_elem_num[31:0]
+@22
+[color] 6
+SystemC.emit_ins.ins_bit[31:0]
+@420
 [color] 6
 SystemC.emit_ins.op[31:0]
 [color] 6

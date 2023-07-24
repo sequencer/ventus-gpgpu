@@ -106,35 +106,19 @@ void BASE::SALU_CALC()
             salutmp2.warp_id = salutmp1.warp_id;
             switch (salutmp1.ins.ddd.alu_fn)
             {
-                // case JAL_:
-                //     WARPS[salutmp1.warp_id]->branch_sig = true;
-                //     WARPS[salutmp1.warp_id]->jump = 1;
-                //     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.ins.currentpc + 4 + salutmp1.ins.s2;
-                //     salutmp2.data = salutmp1.ins.currentpc + 4;
-                //     break;
-                // case JALR_:
-                //     WARPS[salutmp1.warp_id]->branch_sig = true;
-                //     WARPS[salutmp1.warp_id]->jump = 1;
-                //     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss1_data + salutmp1.ins.s2) & (~1);
-                //     salutmp2.data = salutmp1.ins.currentpc + 4;
-                //     break;
-
-                // case ADD_:
-                // case ADDI_:
-                // case AUIPC_:
-                // case JAL_:
-                // case JALR_:
-
             case DecodeParams::FN_ADD:
                 salutmp2.data = salutmp1.rss1_data + salutmp1.rss2_data;
+
                 if (salutmp1.ins.ddd.branch == DecodeParams::B_J) // jal
                 {
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::B_R) // jalr
                 {
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
@@ -996,7 +980,7 @@ void BASE::LSU_CALC()
             //      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             // lsutmp2.rds1_data = external_mem[external_addr];
-            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException);
+            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException, lsutmp2.ins);
             if (addrOutofRangeException)
                 cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             lsufifo.push(lsutmp2);
@@ -1015,7 +999,7 @@ void BASE::LSU_CALC()
             for (int i = 0; i < num_thread; i++)
             {
                 // lsutmp2.rdv1_data[i] = external_mem[lsutmp1.rss1_data / 4 + i - 128 * num_thread];
-                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException);
+                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException, lsutmp2.ins);
                 if (addrOutofRangeException)
                     cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }

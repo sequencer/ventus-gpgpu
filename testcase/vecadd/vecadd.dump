@@ -10,10 +10,10 @@ Disassembly of section .text:
 80000008:	02000e93          	li	t4,32
 8000000c:	0d0efed7          	vsetvli	t4,t4,e32,m1,ta,ma
 80000010:	00002eb7          	lui	t4,0x2
-80000014:	300eaef3          	.4byte	0x300eaef3
+80000014:	300eaef3          	.4byte	0x300eaef3                                      // CSRRS_
 80000018:	00000e93          	li	t4,0
-8000001c:	80602173          	.4byte	0x80602173
-80000020:	80702273          	.4byte	0x80702273
+8000001c:	80602173          	.4byte	0x80602173                                      // CSRRS_
+80000020:	80702273          	.4byte	0x80702273                                      // CSRRS_
 
 80000024 <.Lpcrel_hi1>:
 80000024:	00002517          	auipc	a0,0x2
@@ -30,12 +30,12 @@ Disassembly of section .text:
 80000040:	fec56ce3          	bltu	a0,a2,80000038 <.Ltmp1>
 
 80000044 <.Ltmp0>:
-80000044:	803022f3          	.4byte	0x803022f3
+80000044:	803022f3          	.4byte	0x803022f3                                      // CSRRS_
 80000048:	0002a303          	lw	t1,0(t0)
 8000004c:	0042a503          	lw	a0,4(t0)
 80000050:	000300e7          	jalr	t1
 80000054:	0000400b          	endprg	zero,zero,zero
-80000058:	7f10006f          	j	80001048 <spike_end>
+80000058:	7f10006f          	j	80001048 <spike_end>        // offset=b0 00000000 1 1111111000 0 = 0xff0=, pc=58+ff0=1048
 
 8000005c <vectorAdd>:
 8000005c:	01010113          	addi	sp,sp,16
