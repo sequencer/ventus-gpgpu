@@ -74,7 +74,7 @@ void CTA_Scheduler::readHexFile(const std::string &filename, int itemSize, std::
 
 void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_data &mtd)
 {
-    std::cout << "CTA: assignMetadata, metadata size="<< metadata.size() <<"\n";
+    std::cout << "CTA: assignMetadata, metadata size=" << metadata.size() << "\n";
 
     int index = 0;
 
@@ -144,17 +144,18 @@ void CTA_Scheduler::activate_warp()
 
             cout << "CTA: SM" << i << " warp" << warp_counter << " is activated\n";
             sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0] = warp_counter * 8;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[1] = mtd.wg_size;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[2] = num_thread;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[3] = mtd.metaDataBaseAddr;
-
-
             sm_group[i]->WARPS[warp_counter]->CSR_reg[4] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[5] = warp_counter;
-
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[6] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[7] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[8] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[9] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[10] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[11] = 0;
             ++warp_counter;
         }
         sm_group[i]->mtd = mtd;

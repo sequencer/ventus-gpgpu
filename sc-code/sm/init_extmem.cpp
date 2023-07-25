@@ -62,7 +62,7 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, u
 
     if (bufferIndex == -1)
     {
-        std::cerr << "getBufferData Error: No buffer found for the given virtual address " << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        std::cerr << "getBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         addrOutofRangeException = 1;
         return 0;
     }
@@ -96,7 +96,7 @@ void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &bu
 
     if (bufferIndex == -1)
     {
-        std::cerr << "writeBufferData Error: No buffer found for the given virtual address " << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        std::cerr << "writeBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         return;
     }
 
