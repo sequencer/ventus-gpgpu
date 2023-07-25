@@ -146,6 +146,8 @@ void CTA_Scheduler::activate_warp()
             sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[1] = mtd.wg_size;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[2] = num_thread;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[3] = mtd.metaDataBaseAddr;
+
 
             sm_group[i]->WARPS[warp_counter]->CSR_reg[4] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[5] = warp_counter;
@@ -155,6 +157,7 @@ void CTA_Scheduler::activate_warp()
             sm_group[i]->WARPS[warp_counter]->CSR_reg[10] = 0;
             ++warp_counter;
         }
+        sm_group[i]->mtd = mtd;
         sm_group[i]->num_warp_activated = warp_counter;
     }
 }

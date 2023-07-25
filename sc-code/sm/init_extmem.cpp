@@ -25,16 +25,18 @@ void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uin
     std::vector<uint8_t> buffer;
     while (std::getline(file, line))
     {
-        for (int i = 0; i < line.length(); i += 2)
+        for (int i = line.length(); i > 0; i -= 2)
         {
-            std::string hexChars = line.substr(i, 2);
+            std::string hexChars = line.substr(i - 2, 2);
             uint8_t byte = std::stoi(hexChars, nullptr, 16);
             buffer.push_back(byte);
         }
 
         if (buffer.size() == buffer_size[bufferIndex])
         {
-            buffers.push_back(buffer);
+            // cout << "SM" << sm_id << " INIT_EXTMEM: prepared buffer[" << bufferIndex << "] of size " << buffer.size() << "\n";
+            buffers[bufferIndex] = buffer;
+            // cout << "SM" << sm_id << " INIT_EXTMEM: buffers[" << bufferIndex << "] of size " << buffers[bufferIndex].size() << " is in buffers\n";
             buffer.clear();
             bufferIndex++;
         }
@@ -44,12 +46,13 @@ void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uin
 }
 
 // 通过虚拟地址获取对应缓冲区的数据并转换为整数
-uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException, I_TYPE ins)
+uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, unsigned int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException, I_TYPE ins)
 {
     addrOutofRangeException = 0;
     int bufferIndex = -1;
     for (int i = 0; i < num_buffer; i++)
     {
+        // cout << std::hex << "getBufferData: ranging from " << buffer_base[i] << " to " << (buffer_base[i] + buffer_size[i]) << std::dec << "\n";
         if (virtualAddress >= buffer_base[i] && virtualAddress < (buffer_base[i] + buffer_size[i]))
         {
             bufferIndex = i;
@@ -59,17 +62,19 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, i
 
     if (bufferIndex == -1)
     {
-        std::cerr << "getBufferData error: No buffer found for the given virtual address " << std::hex << virtualAddress << " for ins" << ins << "," << ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        std::cerr << "getBufferData Error: No buffer found for the given virtual address " << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         addrOutofRangeException = 1;
         return 0;
     }
 
     int offset = virtualAddress - buffer_base[bufferIndex];
+    // cout << "getBufferData: offset=" << std::hex << offset << "\n";
     int startIndex = offset;
 
     uint32_t data = 0;
     for (int i = 0; i < 4; i++)
     {
+        // cout << "getBufferData: fetching buffers[" << bufferIndex << "][" << (startIndex + i) << "], buffer size=" << buffers[bufferIndex].size() << "\n";
         uint8_t byte = buffers[bufferIndex][startIndex + i];
         data |= static_cast<uint32_t>(byte) << (i * 8);
     }
@@ -77,7 +82,7 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, i
     return data;
 }
 
-void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size)
+void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, I_TYPE ins)
 {
     int bufferIndex = -1;
     for (int i = 0; i < num_buffer; i++)
@@ -91,7 +96,7 @@ void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &bu
 
     if (bufferIndex == -1)
     {
-        std::cerr << "No buffer found for the given virtual address." << std::endl;
+        std::cerr << "writeBufferData Error: No buffer found for the given virtual address " << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         return;
     }
 

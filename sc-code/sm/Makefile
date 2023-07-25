@@ -17,7 +17,7 @@ endif
 
 App=ventus
 
-.PHONY:BASE_test GPGPU_test
+.PHONY:GPGPU_test GPGPU_test_GDB
 
 all: GPGPU_test
 
@@ -25,6 +25,9 @@ GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp exec.cpp opc.cpp decode.cpp init_decodet
 
 GPGPU_test:
 	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
+
+GPGPU_test_GDB:
+	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20 -g
 
 clean:
 	RM -RF $(App)

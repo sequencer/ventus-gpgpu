@@ -75,7 +75,7 @@ int sc_main(int argc, char *argv[])
         tf[i] = sc_create_vcd_trace_file(("BASE_wave_warp" + std::to_string(i)).c_str());
         tf[i]->set_time_unit(1, SC_NS);
         for (int j = 0; j < 32; j++)
-            sc_trace(tf[i], BASE_impl[0]->testCSR[j], "test_CSR.data(" + std::to_string(j) + ")");
+            sc_trace(tf[i], BASE_impl[0]->WARPS[i]->CSR_reg[j], "CSR.data(" + std::to_string(j) + ")");
         sc_trace(tf[i], clk, "Clk");
         sc_trace(tf[i], rst_n, "Rst_n");
         sc_trace(tf[i], BASE_impl[0]->WARPS[i]->jump, "jump");

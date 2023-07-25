@@ -111,14 +111,14 @@ void BASE::SALU_CALC()
 
                 if (salutmp1.ins.ddd.branch == DecodeParams::B_J) // jal
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::B_R) // jalr
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
@@ -235,7 +235,7 @@ void BASE::SALU_CALC()
         }
         else
         {
-            cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << salutmp1.ins.origin32bit << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             switch (salutmp1.ins.ddd.alu_fn)
             {
             // case BEQ_:
@@ -948,7 +948,7 @@ void BASE::LSU_CALC()
     lsu_in_t lsutmp1;
     lsu_out_t lsutmp2;
     bool succeed;
-    int external_addr;
+    unsigned int external_addr;
     bool addrOutofRangeException;
     while (true)
     {
@@ -990,7 +990,7 @@ void BASE::LSU_CALC()
             // external_addr = (lsutmp1.rss1_data + lsutmp1.ins.d) / 4 - 128 * num_thread;
             external_addr = lsutmp1.rss1_data + lsutmp1.rss2_data;
             // external_mem[external_addr] = lsutmp1.rds1_data;
-            writeBufferData(lsutmp1.rss3_data, *buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size);
+            writeBufferData(lsutmp1.rss3_data, *buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, lsutmp1.ins);
             break;
         case VLE32_V_:
             lsutmp2.ins = lsutmp1.ins;

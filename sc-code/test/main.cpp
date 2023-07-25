@@ -1,27 +1,66 @@
 #include <iostream>
-#include <array>
+#include <vector>
+#include <fstream>
+#include <cstdint>
 #include <sstream>
+#include <iomanip>
 
-template <typename T, std::size_t N, std::size_t... Is>
-void printArrayHelper(std::ostringstream& oss, const std::array<T, N>& arr, std::index_sequence<Is...>)
+void initbuffer(std::vector<std::vector<uint8_t>>* &buffers)
 {
-    ((oss << (Is != 0 ? ", " : "") << arr[Is]), ...);
-}
+    buffers = new std::vector<std::vector<uint8_t>>;
+    std::ifstream file("data_hex.txt");
+    if (!file)
+    {
+        std::cerr << "Error opening file." << std::endl;
+    }
+    std::vector<uint8_t> buffer;
+    std::string line;
+    int lineCount = 0;
+    while (std::getline(file, line))
+    {
+        // Convert hex string to uint8_t
+        std::istringstream iss(line);
+        uint8_t data = 0;
+        iss >> std::hex >> data;
 
-template <typename T, std::size_t N>
-std::string printArray(const std::array<T, N>& arr)
-{
-    std::ostringstream oss;
-    oss << '(';
-    printArrayHelper(oss, arr, std::make_index_sequence<N>{});
-    oss << ')';
-    return oss.str();
+        buffer.push_back(data);
+        lineCount++;
+
+        if (lineCount == 10)
+        {
+            buffers->push_back(buffer);
+            buffer.clear();
+            lineCount = 0;
+        }
+    }
+
+    // If the last buffer is not complete (less than 10 lines), add it to buffers.
+    if (!buffer.empty())
+    {
+        buffers->push_back(buffer);
+    }
+    // Close the file after reading
+    file.close();
 }
 
 int main()
 {
-    std::array<int, 5> myArray = {1, 2, 3, 4, 5};
-    std::cout << printArray(myArray);  // 输出：(1, 2, 3, 4, 5)
+    std::vector<std::vector<uint8_t>> *buffers;
+    initbuffer(buffers);
+
+    // Print the contents of each buffer as an example
+    for (const auto &buf : *buffers)
+    {
+        for (const auto &data : buf)
+        {
+            // Print as hex
+            std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data) << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Don't forget to delete the dynamically allocated memory
+    delete buffers;
 
     return 0;
 }
