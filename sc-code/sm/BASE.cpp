@@ -844,7 +844,7 @@ void BASE::activate_warp(int warp_id)
 {
     if (WARPS[warp_id] == nullptr)
     {
-        WARP_BONE *new_warp_bone_ = new WARP_BONE;
+        WARP_BONE *new_warp_bone_ = new WARP_BONE(warp_id);
         WARPS[warp_id] = new_warp_bone_;
 
         // warp_threads_group[0][warp_id] = new sc_process_handle(sc_spawn(sc_bind(&BASE::PROGRAM_COUNTER, this, warp_id), ("warp" + std::to_string(warp_id) + "_PROGRAM_COUNTER").c_str()));

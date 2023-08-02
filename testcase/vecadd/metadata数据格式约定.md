@@ -21,14 +21,14 @@ struct meta_data{  // 这个metadata是供驱动使用的，而不是给硬件�
 
 在spike启动任务时，会同时写入一个"vecadd.data"文件，格式如下：
 
-```
+```txt
 1233fedc   //按照每行4Bytes的16进制方式，按顺序放入所有buffer的内容
 c3434cca
 ```
 
 对CPUtest.scala这个模块，控制信号按下面的顺序产生：
 
-```
+```scala
   io.host2cta.bits.host_wg_id:=   Cat( i ,0.U(CU_ID_WIDTH.W)), for i in 0 until kernel_size[0]*[1]*[2]
   io.host2cta.bits.host_num_wf:= wg_size
   io.host2cta.bits.host_wf_size:=  wf_size

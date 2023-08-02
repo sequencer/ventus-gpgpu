@@ -27,7 +27,7 @@ inline constexpr double PERIOD = 10;
 inline constexpr int IFIFO_SIZE = 10;
 inline constexpr int OPCFIFO_SIZE = 4;
 inline constexpr int BANK_NUM = 4;
-inline constexpr int NUM_SM = 2;
+inline constexpr int NUM_SM = 1;
 
 using reg_t = sc_int<32>;
 using v_regfile_t = std::array<reg_t, num_thread>;
@@ -1581,7 +1581,21 @@ public:
     int warp_id;
     sc_event ev_kernel_ret; // 当前warp已经执行完kernel
 
-    WARP_BONE()
+    explicit WARP_BONE(int warp_id)
+        : warp_id(warp_id),
+          ibuf_swallow(("ibuf_swallow_warp" + std::to_string(warp_id)).c_str()),
+          fetch_valid(("fetch_valid" + std::to_string(warp_id)).c_str()),
+          fetch_valid2(("fetch_valid2" + std::to_string(warp_id)).c_str()),
+          jump(("jump" + std::to_string(warp_id)).c_str()),
+          branch_sig(("branch_sig" + std::to_string(warp_id)).c_str()),
+          vbran_sig(("vbran_sig" + std::to_string(warp_id)).c_str()),
+          jump_addr(("jump_addr" + std::to_string(warp_id)).c_str()),
+          pc(("pc" + std::to_string(warp_id)).c_str()),
+          decode_ins(("decode_ins" + std::to_string(warp_id)).c_str()),
+          ibuf_empty(("ibuf_empty" + std::to_string(warp_id)).c_str()),
+          ibuf_full(("ibuf_full" + std::to_string(warp_id)).c_str()),
+          ibuftop_ins(("ibuftop_ins" + std::to_string(warp_id)).c_str()),
+          dispatch_warp_valid(("dispatch_warp_valid" + std::to_string(warp_id)).c_str())
     {
         current_mask.write(~sc_bv<num_thread>());
     }
@@ -1590,22 +1604,22 @@ public:
 
     // fetch
     sc_event ev_fetchpc, ev_decode;
-    sc_signal<bool> ibuf_swallow;                                                                    // 表示是否接收上一cycle fetch_valid，相当于ready
-    sc_signal<bool> fetch_valid{"fetch_valid"}, fetch_valid2{"fetch_valid2"};                        // 2是真正的valid，直接与ibuffer沟通
-    sc_signal<bool, SC_MANY_WRITERS> jump{"jump"}, branch_sig{"branch_sig"}, vbran_sig{"vbran_sig"}; // 无论是否jump，只要发生了分支判断，将branch_sig置为1
-    sc_signal<int> jump_addr{"jump_addr"}, pc{"pc"};
+    sc_signal<bool> ibuf_swallow;                                 // 表示是否接收上一cycle fetch_valid，相当于ready
+    sc_signal<bool> fetch_valid, fetch_valid2;                    // 2是真正的valid，直接与ibuffer沟通
+    sc_signal<bool, SC_MANY_WRITERS> jump, branch_sig, vbran_sig; // 无论是否jump，只要发生了分支判断，将branch_sig置为1
+    sc_signal<int> jump_addr, pc;
     I_TYPE fetch_ins;
-    sc_signal<I_TYPE> decode_ins{"decode_ins"};
+    sc_signal<I_TYPE> decode_ins;
     // ibuffer
     sc_event ev_ibuf_updated;
-    sc_signal<bool> ibuf_empty{"ibuf_empty"}, ibuf_full{"ibuf_full"};
-    sc_signal<I_TYPE> ibuftop_ins{"ibuftop_ins"};
+    sc_signal<bool> ibuf_empty, ibuf_full;
+    sc_signal<I_TYPE> ibuftop_ins;
     StaticQueue<I_TYPE, IFIFO_SIZE> ififo;
     sc_signal<int> ififo_elem_num;
     // scoreboard
     sc_event ev_judge_dispatch;
     bool can_dispatch;
-    sc_signal<bool> dispatch_warp_valid{"dispatch_warp_valid"};
+    sc_signal<bool> dispatch_warp_valid;
     I_TYPE _scoretmpins;
     std::set<SCORE_TYPE> score; // record regfile addr that's to be written
     bool wait_bran;             // 应该使用C++类型；dispatch了分支指令，则要暂停dispatch等待分支指令被执行
@@ -1640,20 +1654,21 @@ public:
 
 struct meta_data
 { // 这个metadata是供驱动使用的，而不是给硬件的
-    uint64_t unknown;
+    uint64_t startaddr;
     uint64_t kernel_id;
-    uint64_t kernel_size[3];   ///> 每个kernel的workgroup三维数目
-    uint64_t wf_size;          ///> 每个warp的thread数目
-    uint64_t wg_size;          ///> 每个workgroup的warp数目
-    uint64_t metaDataBaseAddr; ///> CSR_KNL的值，
-    uint64_t ldsSize;          ///> 每个workgroup使用的local memory的大小
-    uint64_t pdsSize;          ///> 每个thread用到的private memory大小
-    uint64_t sgprUsage;        ///> 每个workgroup使用的标量寄存器数目
-    uint64_t vgprUsage;        ///> 每个thread使用的向量寄存器数目
-    uint64_t pdsBaseAddr;      ///> private memory的基址，要转成每个workgroup的基地址， wf_size*wg_size*pdsSize
-    uint64_t num_buffer;       ///> buffer的数目，包括pc
-    uint64_t *buffer_base;     ///> 各buffer的基址。第一块buffer是给硬件用的metadata
-    uint64_t *buffer_size;     ///> 各buffer的size，以Bytes为单位
+    uint64_t kernel_size[3];    ///> 每个kernel的workgroup三维数目
+    uint64_t wf_size;           ///> 每个warp的thread数目
+    uint64_t wg_size;           ///> 每个workgroup的warp数目
+    uint64_t metaDataBaseAddr;  ///> CSR_KNL的值，
+    uint64_t ldsSize;           ///> 每个workgroup使用的local memory的大小
+    uint64_t pdsSize;           ///> 每个thread用到的private memory大小
+    uint64_t sgprUsage;         ///> 每个workgroup使用的标量寄存器数目
+    uint64_t vgprUsage;         ///> 每个thread使用的向量寄存器数目
+    uint64_t pdsBaseAddr;       ///> private memory的基址，要转成每个workgroup的基地址， wf_size*wg_size*pdsSize
+    uint64_t num_buffer;        ///> buffer的数目，包括pc
+    uint64_t *buffer_base;      ///> 各buffer的基址。第一块buffer是给硬件用的metadata
+    uint64_t *buffer_size;      ///> 各buffer的size，以Bytes为单位。实际使用的大小，用于初始化.data
+    uint64_t *buffer_allocsize; ///> 各buffer的size，以Bytes为单位。分配的大小
 };
 
 uint32_t extractBits32(uint32_t number, int start, int end);
