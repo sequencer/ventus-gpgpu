@@ -1669,6 +1669,9 @@ struct meta_data
     uint64_t *buffer_base;      ///> 各buffer的基址。第一块buffer是给硬件用的metadata
     uint64_t *buffer_size;      ///> 各buffer的size，以Bytes为单位。实际使用的大小，用于初始化.data
     uint64_t *buffer_allocsize; ///> 各buffer的size，以Bytes为单位。分配的大小
+
+    int insBufferIndex;         // 指令在哪一个buffer
+
 };
 
 uint32_t extractBits32(uint32_t number, int start, int end);

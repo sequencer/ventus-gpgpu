@@ -104,6 +104,8 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
     for (int i = 0; i < mtd.num_buffer - 1; i++)
     {
         mtd.buffer_base[i] = metadata[index++];
+        if(mtd.buffer_base[i]==mtd.startaddr)
+            mtd.insBufferIndex = i;
     }
     mtd.buffer_base[mtd.num_buffer - 1] = 0x70000000; // localmem base addr
 

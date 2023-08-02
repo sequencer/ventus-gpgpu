@@ -82,6 +82,19 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, u
     return data;
 }
 
+uint32_t BASE::readInsBuffer(unsigned int virtualAddr)
+{
+    int offset = virtualAddr - mtd.startaddr;
+    int startIndex = offset;
+    uint32_t data = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t byte = (*buffer_data)[mtd.insBufferIndex][startIndex + i];
+        data |= static_cast<uint32_t>(byte) << (i * 8);
+    }
+    return data;
+}
+
 void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, I_TYPE ins)
 {
     int bufferIndex = -1;

@@ -122,14 +122,11 @@ void BASE::INSTRUCTION_REG(int warp_id)
                 {
                     // if (sm_id == 0 && warp_id == 0)
                     //     cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: fetch_ins pc=" << std::hex << WARPS[warp_id]->pc.read() << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                    WARPS[warp_id]->fetch_ins =
-                        (WARPS[warp_id]->pc.read() >= 0x80000000)
-                            ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read() - 0x80000000) / 4])
-                            : I_TYPE(INVALID_, 0, 0, 0);
                     // WARPS[warp_id]->fetch_ins =
-                    //     (WARPS[warp_id]->pc.read() >= 0)
-                    //         ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read()) / 4])
+                    //     (WARPS[warp_id]->pc.read() >= 0x80000000)
+                    //         ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read() - 0x80000000) / 4])
                     //         : I_TYPE(INVALID_, 0, 0, 0);
+                    WARPS[warp_id]->fetch_ins = readInsBuffer(WARPS[warp_id]->pc.read());
                     // if (sm_id == 0 && warp_id == 0)
                     //     cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << WARPS[warp_id]->pc.read() / 4 << "]=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec
                     //          << ", will pass to decode_ins at the same cycle at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";

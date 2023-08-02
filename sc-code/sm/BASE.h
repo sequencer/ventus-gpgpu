@@ -18,6 +18,7 @@ public:
     void INIT_EXTMEM();
     void INIT_INSMEM();
     uint32_t getBufferData(const std::vector<std::vector<uint8_t>> &buffers, unsigned int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, bool &addrOutofRangeException, I_TYPE ins);
+    uint32_t readInsBuffer(unsigned int virtualAddress);
     void readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, uint64_t *buffer_size);
     void writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, I_TYPE ins);
     void activate_warp(int warp_id);
@@ -123,7 +124,7 @@ public:
             // sc_spawn(sc_bind(&BASE::JUDGE_DISPATCH, this, i), ("warp" + std::to_string(i) + "_JUDGE_DISPATCH").c_str());
             // sc_spawn(sc_bind(&BASE::UPDATE_SCORE, this, i), ("warp" + std::to_string(i) + "_UPDATE_SCORE").c_str());
             sc_spawn(sc_bind(&BASE::BEFORE_DISPATCH, this, i), ("warp" + std::to_string(i) + "_BEFORE_DISPATCH").c_str());
-            sc_spawn(sc_bind(&BASE::INIT_REG, this, i), ("warp" + std::to_string(i) + "_INIT_REG").c_str());
+            // sc_spawn(sc_bind(&BASE::INIT_REG, this, i), ("warp" + std::to_string(i) + "_INIT_REG").c_str());
             sc_spawn(sc_bind(&BASE::SIMT_STACK, this, i), ("warp" + std::to_string(i) + "_SIMT_STACK").c_str());
             sc_spawn(sc_bind(&BASE::WRITE_REG, this, i), ("warp" + std::to_string(i) + "_WRITE_REG").c_str());
         }
