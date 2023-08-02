@@ -276,8 +276,8 @@ void BASE::cycle_UPDATE_SCORE(int warp_id, I_TYPE &tmpins, std::set<SCORE_TYPE>:
         {
             if (tmpins.ddd.wxd)
                 cout << "Scoreboard warp" << warp_id << " error: dispatch_ins wvd=wxd=1 at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            if (sm_id == 0 && warp_id == 0 && tmpins.d == 0)
-                cout << "SM" << sm_id << " warp" << warp_id << " UPDATE_SCORE insert ins.bit=" << std::hex << tmpins.origin32bit << std::dec << " vector regfile 0 to scoreboard at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0 && warp_id == 0 && tmpins.d == 0)
+            //     cout << "SM" << sm_id << " warp" << warp_id << " UPDATE_SCORE insert ins.bit=" << std::hex << tmpins.origin32bit << std::dec << " vector regfile 0 to scoreboard at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             regtype_ = v;
         }
         else if (tmpins.ddd.wxd)
@@ -819,15 +819,15 @@ void BASE::WRITE_REG(int warp_id)
             // 后续regfile要一次只能写一个，否则报错
             if (write_s)
             {
-                cout << "SM" << sm_id << " warp" << warp_id << " WRITE_REG ins" << wb_ins << "," << std::hex << wb_ins.read().origin32bit
-                     << ": scalar, s_regfile[" << rds1_addr.read() << "]=" << rds1_data << std::dec
+                cout << "SM" << sm_id << " warp" << warp_id << " WRITE_REG ins" << wb_ins
+                     << ": scalar, s_regfile[" << std::dec << rds1_addr.read() << "]=" << std::hex << rds1_data << std::dec
                      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 WARPS[warp_id]->s_regfile[rds1_addr.read()] = rds1_data;
             }
             if (write_v)
             {
-                cout << "SM" << sm_id << " warp" << warp_id << "WRITE_REG ins" << wb_ins << "," << std::hex << wb_ins.read().origin32bit
-                     << ": vector, v_regfile[" << rdv1_addr.read() << "]={"
+                cout << "SM" << sm_id << " warp" << warp_id << "WRITE_REG ins" << wb_ins
+                     << ": vector, v_regfile[" << std::dec << rdv1_addr.read() << "]={" << std::hex
                      << rdv1_data[0] << "," << rdv1_data[1] << "," << rdv1_data[2] << "," << rdv1_data[3] << ","
                      << rdv1_data[4] << "," << rdv1_data[5] << "," << rdv1_data[6] << "," << rdv1_data[7]
                      << std::dec

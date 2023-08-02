@@ -111,14 +111,14 @@ void BASE::SALU_CALC()
 
                 if (salutmp1.ins.ddd.branch == DecodeParams::B_J) // jal
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::B_R) // jalr
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
@@ -293,6 +293,9 @@ void BASE::SALU_CALC()
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
+                break;
+            default:
+                cout << "SALU_CALC warning: switch to unrecognized ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
         }
@@ -544,7 +547,7 @@ void BASE::VALU_CALC()
                 vbranchins_warpid = valutmp1.warp_id;
                 break;
             default:
-                cout << "VALU_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "VALU_CALC warning: switch to unrecognized ins" << valutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
         }
@@ -837,6 +840,9 @@ void BASE::VFPU_CALC()
                     vfputmp2.rdf1_data[i] = std::bit_cast<int>(
                         std::bit_cast<float>(vfputmp1.vfpuSdata1[0]) * std::bit_cast<float>(vfputmp1.vfpuSdata2[i]) + std::bit_cast<float>(vfputmp1.vfpuSdata3[i]));
                 break;
+            default:
+                cout << "VFPU_CALC warning: switch to unrecognized ins" << vfputmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                break;
             }
             vfpufifo.push(vfputmp2);
         }
@@ -1007,7 +1013,7 @@ void BASE::LSU_CALC()
             // cout << "LSU_CALC: pushed vle32v output at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             break;
         default:
-            cout << "LSU error: unimplemented instruction! op=" << lsutmp1.ins.op << "\n";
+            cout << "LSU_CALC warning: switch to unrecognized ins" << lsutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             break;
         }
         ev_lsufifo_pushed.notify();
@@ -1263,6 +1269,12 @@ void BASE::CSR_CALC()
                 csrtmp2.data = t;
                 WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
                 break;
+            case VSETVLI_:
+                csrtmp2.data = num_thread;
+                break;
+            default:
+                cout << "CSR_CALC warning: switch to unrecognized ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                break;
             }
             csrfifo.push(csrtmp2);
             // if (sm_id == 0)
@@ -1408,7 +1420,7 @@ void BASE::MUL_CALC()
                 break;
 
             default:
-                cout << "MUL_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "MUL_CALC warning: switch to unrecognized ins" << multmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
             mulfifo.push(multmp2);
@@ -1593,7 +1605,7 @@ void BASE::SFU_CALC()
                 break;
 
             default:
-                cout << "SFU_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SFU_CALC warning: switch to unrecognized ins" << sfutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
             sfufifo.push(sfutmp2);
@@ -1604,7 +1616,7 @@ void BASE::SFU_CALC()
             {
 
             default:
-                cout << "SFU_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SFU_CALC warning: switch to unrecognized ins" << sfutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
         }

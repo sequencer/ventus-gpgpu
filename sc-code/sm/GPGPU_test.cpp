@@ -49,7 +49,6 @@ int sc_main(int argc, char *argv[])
     cta_impl.CTA_INIT();
     for (int i = 0; i < NUM_SM; i++)
     {
-        BASE_impl[i]->mtd = cta_impl.mtd;
         BASE_impl[i]->metafile = "../../testcase/" + metafile;
         BASE_impl[i]->datafile = "../../testcase/" + datafile;
         for (auto &warp_ : BASE_impl[i]->WARPS)

@@ -108,13 +108,23 @@ void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &bu
         uint8_t byte = static_cast<uint8_t>(writevalue >> (i * 8));
         buffers[bufferIndex][startIndex + i] = byte;
     }
+
+    std::cout << "SM" << sm_id << std::hex << " write extmem[" << virtualAddress << "]=" << writevalue << std::dec << ",ins=" << ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+}
+
+void init_local_and_private_mem(std::vector<std::vector<uint8_t>> &buffers, meta_data mtd)
+{
+    uint64_t ldsSize = mtd.ldsSize;
+    uint64_t pdsSize = mtd.pdsSize;
+    buffers[mtd.num_buffer - 2].resize(ldsSize);
+    buffers[mtd.num_buffer - 1].resize(pdsSize);
 }
 
 void BASE::INIT_EXTMEM()
 {
     int num_buffer = mtd.num_buffer;
-    uint64_t *buffer_base = mtd.buffer_base;
     uint64_t *buffer_size = mtd.buffer_size;
-    buffer_data = new std::vector<std::vector<uint8_t>>(num_buffer);
+    buffer_data = new std::vector<std::vector<uint8_t>>(num_buffer); // 此时num_buffer已经是.meta文件里的num_buffer+2，包含了local和private这两个buffer
     readTextFile(datafile, *buffer_data, buffer_size);
+    init_local_and_private_mem(*buffer_data, mtd);
 }

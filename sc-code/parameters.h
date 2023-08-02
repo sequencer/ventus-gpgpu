@@ -194,6 +194,7 @@ enum OP_TYPE
     REMU_,
     SB_,
     SC_W_,
+    SETRPC_,
     SH_,
     SLL_,
     SLLI_,
@@ -822,6 +823,9 @@ namespace DecodeParams
         FN_TTF,
         FN_TTH,
         FN_TTB,
+        FN_A2ZERO,
+        FN_SWAP,
+        FN_AMOADD,
     };
     enum mem_t
     {
@@ -926,7 +930,7 @@ public:
     }
     friend ostream &operator<<(ostream &os, I_TYPE const &v)
     {
-        os << "(" << (magic_enum::enum_name((OP_TYPE)v.op)) << "," << v.d << "," << v.s1 << "," << v.s2 << "," << v.s3 << ")";
+        os << "(" << (magic_enum::enum_name((OP_TYPE)v.op)) << "," << v.d << "," << v.s1 << "," << v.s2 << "," << v.s3 << ")," << std::hex << v.origin32bit << std::dec;
         return os;
     }
     friend void sc_trace(sc_trace_file *tf, const I_TYPE &v, const std::string &NAME)
@@ -1432,7 +1436,7 @@ public:
     bool pair;
     friend ostream &operator<<(ostream &os, simtstack_t const &v)
     {
-        os << "(rmask" << v.rmask << ",elsemask" << v.elsemask << ",elsepc" << v.elsepc << ",ispart" << v.is_part << ",pair" << v.pair << ")";
+        os << "(rmask:" << v.rmask << ",elsemask:" << v.elsemask << ",elsepc:" << std::hex << v.elsepc << std::dec << ",ispart" << v.is_part << ",pair" << v.pair << ")";
         return os;
     }
 };
@@ -1636,6 +1640,7 @@ public:
 
 struct meta_data
 { // 这个metadata是供驱动使用的，而不是给硬件的
+    uint64_t unknown;
     uint64_t kernel_id;
     uint64_t kernel_size[3];   ///> 每个kernel的workgroup三维数目
     uint64_t wf_size;          ///> 每个warp的thread数目

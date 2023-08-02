@@ -10,7 +10,7 @@ Please scroll down for the English version of README.
 
 配置systemc可以参考我的[博文](https://zhuanlan.zhihu.com/p/638360098)（也参考了很多别人的经验，但这篇比较适合本工程）。
 
-主程序目前在 sc-code/sm 中，在sm文件夹下运行【make -j $(nproc) && ./ventus --inssrc imem --metafile vecadd/vecadd.riscv.meta --datafile vecadd/vecadd.riscv.data --numcycle 4000】来编译程序并运行。
+主程序目前在 sc-code/sm 中，在sm文件夹下运行【make -j $(nproc) && ./ventus --inssrc imem --metafile vecadd/vecadd.metadata --datafile vecadd/vecadd.data --numcycle 4000】来编译程序并运行。
 
 出现Segmentation fault的调试方法：  
 参考[Linux下Segmentation Fault的定位方法](https://blog.csdn.net/whahu1989/article/details/110881842)、[linux下不产生core文件的原因](https://blog.csdn.net/qq_35621436/article/details/120870746)。  

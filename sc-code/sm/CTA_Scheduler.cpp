@@ -78,6 +78,8 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
 
     int index = 0;
 
+    // mtd.unknown = metadata[index++];
+
     mtd.kernel_id = metadata[index++];
 
     for (int i = 0; i < 3; i++)
@@ -94,21 +96,24 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
     mtd.vgprUsage = metadata[index++];
     mtd.pdsBaseAddr = metadata[index++];
 
-    mtd.num_buffer = metadata[index++];
-    // cout << "CTA: num_buffer=" << std::hex << mtd.num_buffer << std::dec << "\n";
+    mtd.num_buffer = metadata[index++] + 2; // add localmem and privatemem buffer
 
     mtd.buffer_base = new uint64_t[mtd.num_buffer];
 
-    for (int i = 0; i < mtd.num_buffer; i++)
+    for (int i = 0; i < mtd.num_buffer - 2; i++)
     {
         mtd.buffer_base[i] = metadata[index++];
     }
+    mtd.buffer_base[mtd.num_buffer - 2] = 0x70000000;
+    mtd.buffer_base[mtd.num_buffer - 1] = mtd.pdsBaseAddr;
 
     mtd.buffer_size = new uint64_t[mtd.num_buffer];
-    for (int i = 0; i < mtd.num_buffer; i++)
+    for (int i = 0; i < mtd.num_buffer - 2; i++)
     {
         mtd.buffer_size[i] = metadata[index++];
     }
+    mtd.buffer_size[mtd.num_buffer - 2] = mtd.ldsSize;
+    mtd.buffer_size[mtd.num_buffer - 1] = mtd.pdsSize;
 
     std::cout << "CTA: Finish assignMetadata()\n";
 }
@@ -150,7 +155,7 @@ void CTA_Scheduler::activate_warp()
             sm_group[i]->WARPS[warp_counter]->CSR_reg[3] = mtd.metaDataBaseAddr;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[4] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[5] = warp_counter;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[6] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[6] = 0x70000000;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[7] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[8] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[9] = 0;
@@ -159,6 +164,7 @@ void CTA_Scheduler::activate_warp()
             ++warp_counter;
         }
         sm_group[i]->mtd = mtd;
+        sm_group[i]->mtd.num_buffer = sm_group[i]->mtd.num_buffer;
         sm_group[i]->num_warp_activated = warp_counter;
     }
 }
