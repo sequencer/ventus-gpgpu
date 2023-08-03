@@ -1240,7 +1240,7 @@ void BASE::CSR_CALC()
         {
             csrtmp2.ins = csrtmp1.ins;
             csrtmp2.warp_id = csrtmp1.warp_id;
-            int csr_addr = extractBits32(csrtmp2.ins.origin32bit, 31, 20) - 0x800;
+            int csr_addr = extractBits32(csrtmp2.ins.origin32bit, 31, 20);
             switch (csrtmp1.ins.op)
             {
             case CSRRW_:

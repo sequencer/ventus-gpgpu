@@ -1628,7 +1628,7 @@ public:
     // regfile
     std::array<reg_t, 32> s_regfile;
     std::array<v_regfile_t, 32> v_regfile;
-    std::array<int, 12> CSR_reg;
+    std::array<int, 0x820> CSR_reg;
     // simt-stack
     std::stack<simtstack_t> simt_stack;
     sc_signal<sc_bv<num_thread>> current_mask; // 在dispatch时随指令存入OPC
@@ -1674,7 +1674,9 @@ struct meta_data
 
 };
 
-uint32_t extractBits32(uint32_t number, int start, int end);
+uint32_t extractBits32(uint32_t number, int start, int end) {
+    return (number >> end) & ((1 << (start - end + 1)) - 1);
+}
 
 template <typename T, std::size_t N, std::size_t... Is>
 void printArrayHelper(const std::array<T, N> &arr, std::index_sequence<Is...>)

@@ -169,18 +169,18 @@ void CTA_Scheduler::activate_warp()
 
             cout << "CTA: SM" << i << " warp" << warp_counter << " is activated\n";
             sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[0] = warp_counter * 8;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[1] = mtd.wg_size;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[2] = num_thread;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[3] = mtd.metaDataBaseAddr;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[4] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[5] = warp_counter;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[6] = 0x70000000;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[7] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[8] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[9] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[10] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[11] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x800] = warp_counter * 8;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x801] = mtd.wg_size;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x802] = num_thread;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x803] = mtd.metaDataBaseAddr;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x804] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x805] = warp_counter;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x806] = 0x70000000;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x807] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x808] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x809] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x810] = 0;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x811] = 0;
             ++warp_counter;
         }
         sm_group[i]->mtd = mtd;
