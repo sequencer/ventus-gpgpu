@@ -62,7 +62,7 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, u
 
     if (bufferIndex == -1)
     {
-        std::cerr << "getBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        std::cerr << "getBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         addrOutofRangeException = 1;
         return 0;
     }
@@ -82,10 +82,16 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, u
     return data;
 }
 
-uint32_t BASE::readInsBuffer(unsigned int virtualAddr)
+uint32_t BASE::readInsBuffer(unsigned int virtualAddr, bool &addrOutofRangeException)
 {
-    int offset = virtualAddr - mtd.startaddr;
-    int startIndex = offset;
+    addrOutofRangeException = 0;
+    int startIndex = virtualAddr - mtd.startaddr;
+    if (startIndex < 0 || startIndex > mtd.buffer_size[mtd.insBufferIndex])
+    {
+        cout << "readInsBuffer Error: virtualAddr(pc)=0x" << std::hex << virtualAddr << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        addrOutofRangeException = 1;
+        return 0;
+    }
     uint32_t data = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -95,7 +101,7 @@ uint32_t BASE::readInsBuffer(unsigned int virtualAddr)
     return data;
 }
 
-void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, I_TYPE ins)
+void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &buffers, unsigned int virtualAddress, int num_buffer, uint64_t *buffer_base, uint64_t *buffer_size, I_TYPE ins)
 {
     int bufferIndex = -1;
     for (int i = 0; i < num_buffer; i++)
@@ -109,7 +115,7 @@ void BASE::writeBufferData(int writevalue, std::vector<std::vector<uint8_t>> &bu
 
     if (bufferIndex == -1)
     {
-        std::cerr << "writeBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << "," << std::hex << ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+        std::cerr << "writeBufferData Error: No buffer found for the given virtual address 0x" << std::hex << virtualAddress << " for ins" << ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         return;
     }
 

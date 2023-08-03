@@ -97,17 +97,21 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
     mtd.pdsBaseAddr = metadata[index++];
 
     mtd.num_buffer = metadata[index++] + 1; // add localmem buffer
-    cout << "CTA: assign mtd.num_buffer=" << mtd.num_buffer << "\n";
+    cout << "CTA: assign mtd.num_buffer=" << mtd.num_buffer << "(including the extra local memory buffer)\n";
 
     mtd.buffer_base = new uint64_t[mtd.num_buffer];
 
     for (int i = 0; i < mtd.num_buffer - 1; i++)
     {
         mtd.buffer_base[i] = metadata[index++];
-        if(mtd.buffer_base[i]==mtd.startaddr)
+        if (mtd.buffer_base[i] == mtd.startaddr)
             mtd.insBufferIndex = i;
     }
     mtd.buffer_base[mtd.num_buffer - 1] = 0x70000000; // localmem base addr
+    cout << "CTA: mtd.buffer_base=" << std::hex;
+    for (int i = 0; i < mtd.num_buffer; i++)
+        cout << mtd.buffer_base[i] << ",";
+    cout << std::dec << "\n";
 
     mtd.buffer_size = new uint64_t[mtd.num_buffer];
     for (int i = 0; i < mtd.num_buffer - 1; i++)
@@ -115,6 +119,10 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
         mtd.buffer_size[i] = metadata[index++];
     }
     mtd.buffer_size[mtd.num_buffer - 1] = 0;
+    cout << "CTA: mtd.buffer_size=" << std::hex;
+    for (int i = 0; i < mtd.num_buffer; i++)
+        cout << mtd.buffer_size[i] << ",";
+    cout << std::dec << "\n";
 
     mtd.buffer_allocsize = new uint64_t[mtd.num_buffer];
     for (int i = 0; i < mtd.num_buffer - 1; i++)
@@ -122,6 +130,11 @@ void CTA_Scheduler::assignMetadata(const std::vector<uint64_t> &metadata, meta_d
         mtd.buffer_allocsize[i] = metadata[index++];
     }
     mtd.buffer_allocsize[mtd.num_buffer - 1] = mtd.ldsSize;
+    cout << "CTA: mtd.buffer_allocsize=" << std::hex;
+    for (int i = 0; i < mtd.num_buffer; i++)
+        cout << mtd.buffer_allocsize[i] << ",";
+    cout << std::dec << "\n";
+
     std::cout << "CTA: Finish assignMetadata()\n";
 }
 

@@ -96,12 +96,14 @@ void BASE::INSTRUCTION_REG(int warp_id)
     // ireg[5] = I_TYPE(VFADD_VV_, 3, 4, 2);
     // ireg[6] = I_TYPE(BEQ_, 0, 7, 5);
 
+    bool addrOutofRangeException;
+
     while (true)
     {
         // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: finish at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         wait(clk.posedge_event());
         // cout << "SM" << sm_id << " warp" << warp_id << " INSTRUCTION_REG: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-        if (WARPS[warp_id]->is_warp_activated)
+        if (WARPS[warp_id]->is_warp_activated && rst_n != 0)
         {
             if (WARPS[warp_id]->jump == 1 |
                 WARPS[warp_id]->simtstk_jump == 1)
@@ -126,7 +128,10 @@ void BASE::INSTRUCTION_REG(int warp_id)
                     //     (WARPS[warp_id]->pc.read() >= 0x80000000)
                     //         ? I_TYPE(ins_mem[(WARPS[warp_id]->pc.read() - 0x80000000) / 4])
                     //         : I_TYPE(INVALID_, 0, 0, 0);
-                    WARPS[warp_id]->fetch_ins = readInsBuffer(WARPS[warp_id]->pc.read());
+                    WARPS[warp_id]->fetch_ins = readInsBuffer(WARPS[warp_id]->pc.read(), addrOutofRangeException);
+                    if (addrOutofRangeException)
+                        cout << "SM" << sm_id << " warp" << warp_id << "INS_REG error: pc out of range at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
                     // if (sm_id == 0 && warp_id == 0)
                     //     cout << "SM" << sm_id << " warp" << warp_id << " ICACHE: read fetch_ins.bit=ins_mem[" << std::hex << WARPS[warp_id]->pc.read() / 4 << "]=" << WARPS[warp_id]->fetch_ins.origin32bit << std::dec
                     //          << ", will pass to decode_ins at the same cycle at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";

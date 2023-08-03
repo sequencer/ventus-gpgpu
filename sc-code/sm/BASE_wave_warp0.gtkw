@@ -1,14 +1,14 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Mon Jul 24 15:20:54 2023
+[*] Wed Aug  2 17:33:12 2023
 [*]
 [dumpfile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.vcd"
-[dumpfile_mtime] "Mon Jul 24 15:20:13 2023"
-[dumpfile_size] 61440
+[dumpfile_mtime] "Wed Aug  2 17:27:33 2023"
+[dumpfile_size] 57344
 [savefile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.gtkw"
-[timestart] 175
+[timestart] 0
 [size] 2548 1359
-[pos] -1 -1
+[pos] 35295 32735
 *-5.000000 219 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] SystemC.
 [sst_width] 214
@@ -23,7 +23,7 @@ SystemC.jump
 @28
 SystemC.bramch_sig
 SystemC.vbran_sig
-@420
+@23
 SystemC.pc[31:0]
 @22
 [color] 1

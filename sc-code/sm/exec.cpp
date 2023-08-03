@@ -532,6 +532,7 @@ void BASE::VALU_CALC()
             switch (valutmp1.ins.op)
             {
             case VBEQ_:
+                cout << "SM" << sm_id << "exec branch ins" << valutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 for (int i = 0; i < num_thread; i++)
                 {
                     if (valutmp1.rsv1_data[i] == valutmp1.rsv2_data[i])
@@ -986,7 +987,7 @@ void BASE::LSU_CALC()
             //      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             // lsutmp2.rds1_data = external_mem[external_addr];
-            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException, lsutmp2.ins);
+            lsutmp2.rds1_data = getBufferData(*buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_allocsize, addrOutofRangeException, lsutmp2.ins);
             if (addrOutofRangeException)
                 cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             lsufifo.push(lsutmp2);
@@ -996,7 +997,7 @@ void BASE::LSU_CALC()
             // external_addr = (lsutmp1.rss1_data + lsutmp1.ins.d) / 4 - 128 * num_thread;
             external_addr = lsutmp1.rss1_data + lsutmp1.rss2_data;
             // external_mem[external_addr] = lsutmp1.rds1_data;
-            writeBufferData(lsutmp1.rss3_data, *buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, lsutmp1.ins);
+            writeBufferData(lsutmp1.rss3_data, *buffer_data, external_addr, mtd.num_buffer, mtd.buffer_base, mtd.buffer_allocsize, lsutmp1.ins);
             break;
         case VLE32_V_:
             lsutmp2.ins = lsutmp1.ins;
@@ -1005,7 +1006,7 @@ void BASE::LSU_CALC()
             for (int i = 0; i < num_thread; i++)
             {
                 // lsutmp2.rdv1_data[i] = external_mem[lsutmp1.rss1_data / 4 + i - 128 * num_thread];
-                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_size, addrOutofRangeException, lsutmp2.ins);
+                lsutmp2.rdv1_data[i] = getBufferData(*buffer_data, lsutmp1.rss1_data + i * 4, mtd.num_buffer, mtd.buffer_base, mtd.buffer_allocsize, addrOutofRangeException, lsutmp2.ins);
                 if (addrOutofRangeException)
                     cout << "SM" << sm_id << " LSU detect addrOutofRange, ins=" << lsutmp1.ins << ",addr=" << external_addr << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
@@ -1068,6 +1069,8 @@ void BASE::SIMT_STACK(int warp_id)
             if (emito_simtstk)
                 cout << "SIMT-STACK error: receive join & beq at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
+            cout << "SM" << sm_id << " warp" << warp_id << " SIMT_STK receive branch ins" << vbranch_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
             /*** 以下为stack管理 ***/
             if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == 0)
             { // VALU计算出的elsemask全为0
@@ -1105,6 +1108,7 @@ void BASE::SIMT_STACK(int warp_id)
         }
         if (emito_simtstk && emitins_warpid == warp_id) // OPC发射的join指令
         {
+            cout << "SM" << sm_id << " warp" << warp_id << " SIMT_STK receive join ins" << emit_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             WARPS[warp_id]->vbran_sig = true;
             simtstack_t &tmpstkelem = WARPS[warp_id]->simt_stack.top();
             readins = emit_ins;

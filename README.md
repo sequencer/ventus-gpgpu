@@ -18,7 +18,9 @@ Please scroll down for the English version of README.
 
 ```bash
 ulimit -c unlimited
-make GPGPU_test_GDB
+sudo bash -c "echo core > /proc/sys/kernel/core_pattern "
+make GPGPU_test_GDB -j $(nproc)
+./ventus --inssrc imem --metafile vecadd/vecadd.metadata --datafile vecadd/vecadd.data --numcycle 4000
 gdb ./ventus ./core
 ```
 
