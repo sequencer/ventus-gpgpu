@@ -11,8 +11,9 @@
 // std::vector<std::vector<uint8_t>> buffer_data(num_buffer);
 
 // 读取外部文本文件并将数据存入缓冲区
-void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, uint64_t *buffer_size)
+void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uint8_t>> &buffers, meta_data mtd)
 {
+
     std::ifstream file(filename);
     if (!file.is_open())
     {
@@ -23,24 +24,30 @@ void BASE::readTextFile(const std::string &filename, std::vector<std::vector<uin
     std::string line;
     int bufferIndex = 0;
     std::vector<uint8_t> buffer;
-    while (std::getline(file, line))
+    for (int bufferIndex = 0; bufferIndex < mtd.num_buffer; bufferIndex++)
     {
-        for (int i = line.length(); i > 0; i -= 2)
+        buffer.reserve(mtd.buffer_allocsize[bufferIndex]); // 提前分配空间
+        int readbytes = 0;
+        while (readbytes < mtd.buffer_size[bufferIndex])
         {
-            std::string hexChars = line.substr(i - 2, 2);
-            uint8_t byte = std::stoi(hexChars, nullptr, 16);
-            buffer.push_back(byte);
+            std::getline(file, line);
+            for (int i = line.length(); i > 0; i -= 2)
+            {
+                std::string hexChars = line.substr(i - 2, 2);
+                uint8_t byte = std::stoi(hexChars, nullptr, 16);
+                buffer.push_back(byte);
+            }
+            readbytes += 4;
         }
-
-        if (buffer.size() == buffer_size[bufferIndex])
-        {
-            // cout << "SM" << sm_id << " INIT_EXTMEM: prepared buffer[" << bufferIndex << "] of size " << buffer.size() << "\n";
-            buffers[bufferIndex] = buffer;
-            // cout << "SM" << sm_id << " INIT_EXTMEM: buffers[" << bufferIndex << "] of size " << buffers[bufferIndex].size() << " is in buffers\n";
-            buffer.clear();
-            bufferIndex++;
-        }
+        buffer.resize(mtd.buffer_allocsize[bufferIndex]);
+        buffers[bufferIndex] = buffer;
+        buffer.clear();
     }
+
+    cout << "finish reading .data file: buffers.allocsize=" << std::hex;
+    for (auto buffer : buffers)
+        cout << "0x" << buffer.size() << " ";
+    cout << std::dec << "\n";
 
     file.close();
 }
@@ -52,7 +59,7 @@ uint32_t BASE::getBufferData(const std::vector<std::vector<uint8_t>> &buffers, u
     int bufferIndex = -1;
     for (int i = 0; i < num_buffer; i++)
     {
-        // cout << std::hex << "getBufferData: ranging from " << buffer_base[i] << " to " << (buffer_base[i] + buffer_size[i]) << std::dec << "\n";
+        // cout << std::hex << "getBufferData: ranging from " << buffer_base[i] << " to " << (buffer_base[i] + buffer_size[i]) << ", virtualAddr=" << virtualAddress << std::dec << "\n";
         if (virtualAddress >= buffer_base[i] && virtualAddress < (buffer_base[i] + buffer_size[i]))
         {
             bufferIndex = i;
@@ -141,9 +148,7 @@ void init_local_and_private_mem(std::vector<std::vector<uint8_t>> &buffers, meta
 
 void BASE::INIT_EXTMEM()
 {
-    int num_buffer = mtd.num_buffer;
-    uint64_t *buffer_size = mtd.buffer_size;
-    buffer_data = new std::vector<std::vector<uint8_t>>(num_buffer); // 此时num_buffer已经是.meta文件里的num_buffer+2，包含了local和private这两个buffer
-    readTextFile(datafile, *buffer_data, buffer_size);
+    buffer_data = new std::vector<std::vector<uint8_t>>(mtd.num_buffer); // 此时num_buffer已经是.meta文件里的num_buffer+1，包含了末尾的local buffer
+    readTextFile(datafile, *buffer_data, mtd);
     init_local_and_private_mem(*buffer_data, mtd);
 }
