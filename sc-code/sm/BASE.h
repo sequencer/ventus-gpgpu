@@ -263,7 +263,7 @@ public:
 
     sc_signal<bool> emito_valu{"emito_valu"};
     sc_vector<sc_signal<reg_t>> tovalu_data1{"tovalu_data1", num_thread}, // OPC TO VALU
-        tovalu_data2{"tovalu_data2", num_thread};
+        tovalu_data2{"tovalu_data2", num_thread}, tovalu_data3{"tovalu_data3", num_thread};
     bool valu_ready;
     sc_signal<bool> valu_ready_old{"Valu_ready_old"};
     sc_event_queue valu_eqa, valu_eqb;
@@ -295,7 +295,7 @@ public:
 
     sc_signal<bool> emito_lsu{"emito_lsu"};
     sc_vector<sc_signal<int32_t>> tolsu_data1{"emitolsu_data1", num_thread}, // OPC TO LSU
-        tolsu_data2{"emitolsu_data2", num_thread};
+        tolsu_data2{"emitolsu_data2", num_thread}, tolsu_data3{"emitolsu_data3", num_thread};
     bool lsu_ready;
     sc_signal<bool> lsu_ready_old{"lsu_ready_old"};
     sc_event_queue lsu_eqa, lsu_eqb;
@@ -315,7 +315,7 @@ public:
     sc_signal<int> simtstk_new_warpid{"simtstk_new_warpid"};           // newelem对应的warp
     sc_signal<sc_bv<num_thread>> branch_elsemask{"branch_elsemask"};   // VALU计算出的elsemask，将发给SIMT-stack
     sc_signal<sc_bv<num_thread>> branch_ifmask{"branch_ifmask"};       // 与elsemask相反
-    sc_signal<int> branch_elsepc{"branch_elsepc"};                     // VALU处理分支跳转的else分支pc
+    sc_signal<uint32_t> branch_elsepc{"branch_elsepc"};                     // VALU处理分支跳转的else分支pc
     sc_signal<I_TYPE> vbranch_ins{"vbranch_ins"};
     sc_signal<int> vbranchins_warpid{"vbranchins_warpid"};
 

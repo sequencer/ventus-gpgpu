@@ -1,20 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Wed Aug  2 17:33:12 2023
+[*] Sat Aug  5 06:03:57 2023
 [*]
 [dumpfile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.vcd"
-[dumpfile_mtime] "Wed Aug  2 17:27:33 2023"
-[dumpfile_size] 57344
+[dumpfile_mtime] "Sat Aug  5 06:03:12 2023"
+[dumpfile_size] 672272
 [savefile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.gtkw"
-[timestart] 0
-[size] 2548 1359
-[pos] 35295 32735
-*-5.000000 219 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 1616
+[size] 2350 1266
+[pos] -1 -1
+*-6.000000 605 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] SystemC.
+[treeopen] SystemC.salutmp2.
+[treeopen] SystemC.salutop_dat.
 [sst_width] 214
 [signals_width] 369
 [sst_expanded] 1
-[sst_vpaned_height] 400
+[sst_vpaned_height] 368
 @420
 SystemC.Clk
 SystemC.Rst_n
@@ -23,18 +25,18 @@ SystemC.jump
 @28
 SystemC.bramch_sig
 SystemC.vbran_sig
-@23
-SystemC.pc[31:0]
 @22
+SystemC.pc[31:0]
 [color] 1
 SystemC.fetch_ins.ins_bit[31:0]
 SystemC.decode_ins.ins_bit[31:0]
-SystemC.decode_ins.op[31:0]
-SystemC.decode_ins.s1[31:0]
-SystemC.decode_ins.s2[31:0]
+SystemC.decode_ins.currentpc[31:0]
 @420
 [color] 1
 SystemC.fetch_valid
+@28
+SystemC.fetch_valid2
+@420
 [color] 3
 SystemC.ififo_elem_num[31:0]
 [color] 3
@@ -44,15 +46,10 @@ SystemC.ibuf_empty
 @22
 [color] 2
 SystemC.ibuftop_ins.ins_bit[31:0]
+SystemC.ibuftop_ins.currentpc[31:0]
 @420
 [color] 2
 SystemC.ibuftop_ins.op[31:0]
-[color] 2
-SystemC.ibuftop_ins.d[31:0]
-[color] 2
-SystemC.ibuftop_ins.s1[31:0]
-[color] 2
-SystemC.ibuftop_ins.s2[31:0]
 SystemC.wait_bran
 [color] 3
 SystemC.can_dispatch
@@ -118,8 +115,11 @@ SystemC.salufifo_empty
 SystemC.salufifo_elem_num[31:0]
 @420
 SystemC.execpop_salu
+@22
 [color] 2
 SystemC.salutmp2.data[31:0]
+[color] 2
+SystemC.salutmp2.ins.ins_bit[31:0]
 @c00420
 [color] 2
 SystemC.salutmp2.warp_id[31:0]
@@ -190,27 +190,18 @@ SystemC.salutmp2.warp_id[31:0]
 (31)SystemC.salutmp2.warp_id[31:0]
 @1401200
 -group_end
-@420
-[color] 2
-SystemC.salutmp2.ins.op[31:0]
-[color] 2
-SystemC.salutmp2.ins.d[31:0]
-[color] 2
-SystemC.salutmp2.ins.s1[31:0]
-[color] 2
-SystemC.salutmp2.ins.s2[31:0]
+@22
 [color] 5
 SystemC.salutop_dat.data[31:0]
 [color] 5
+SystemC.salutop_dat.ins.currentpc[31:0]
+[color] 5
+SystemC.salutop_dat.ins.ins_bit[31:0]
+@420
+[color] 5
 SystemC.salutop_dat.warp_id[31:0]
-[color] 5
-SystemC.salutop_dat.ins.op[31:0]
-[color] 5
-SystemC.salutop_dat.ins.d[31:0]
-[color] 5
-SystemC.salutop_dat.ins.s1[31:0]
-[color] 5
-SystemC.salutop_dat.ins.s2[31:0]
+@22
+SystemC.salutop_dat.ins.ins_bit[31:0]
 @20000
 -
 @420
@@ -233,7 +224,6 @@ SystemC.emito_valu
 SystemC.valu_ready
 @28
 SystemC.valuto_simtstk
-SystemC.branch_elsemask[7:0]
 @420
 SystemC.branch_elsepc[31:0]
 [color] 7
@@ -279,6 +269,9 @@ SystemC.emito_vfpu
 SystemC.vfpu_ready
 [color] 7
 SystemC.execpop_vfpu
+@20000
+-
+@420
 [color] 2
 SystemC.write_s
 [color] 2
@@ -287,17 +280,14 @@ SystemC.write_v
 SystemC.write_f
 [color] 3
 SystemC.wb_ena
-[color] 2
-SystemC.wb_ins.op[31:0]
-[color] 2
-SystemC.wb_ins.d[31:0]
-[color] 2
-SystemC.wb_ins.s1[31:0]
-[color] 2
-SystemC.wb_ins.s2[31:0]
+@22
+SystemC.wb_ins.ins_bit[31:0]
+SystemC.wb_ins.currentpc[31:0]
+@420
 [color] 2
 SystemC.wb_warpid[31:0]
 SystemC.s_regfile.data(0)[31:0]
+@22
 [color] 5
 SystemC.v_regfile(0)(0)[31:0]
 [color] 5
@@ -316,38 +306,5 @@ SystemC.v_regfile(6)(0)[31:0]
 SystemC.v_regfile(7)(0)[31:0]
 @200
 -
-@22
-SystemC.CSR.data(0)[31:0]
-SystemC.CSR.data(1)[31:0]
-SystemC.CSR.data(2)[31:0]
-SystemC.CSR.data(3)[31:0]
-SystemC.CSR.data(4)[31:0]
-SystemC.CSR.data(5)[31:0]
-SystemC.CSR.data(6)[31:0]
-SystemC.CSR.data(7)[31:0]
-SystemC.CSR.data(8)[31:0]
-SystemC.CSR.data(9)[31:0]
-SystemC.CSR.data(10)[31:0]
-SystemC.CSR.data(11)[31:0]
-SystemC.CSR.data(12)[31:0]
-SystemC.CSR.data(13)[31:0]
-SystemC.CSR.data(14)[31:0]
-SystemC.CSR.data(15)[31:0]
-SystemC.CSR.data(16)[31:0]
-SystemC.CSR.data(17)[31:0]
-SystemC.CSR.data(18)[31:0]
-SystemC.CSR.data(19)[31:0]
-SystemC.CSR.data(20)[31:0]
-SystemC.CSR.data(21)[31:0]
-SystemC.CSR.data(22)[31:0]
-SystemC.CSR.data(23)[31:0]
-SystemC.CSR.data(24)[31:0]
-SystemC.CSR.data(25)[31:0]
-SystemC.CSR.data(26)[31:0]
-SystemC.CSR.data(27)[31:0]
-SystemC.CSR.data(28)[31:0]
-SystemC.CSR.data(29)[31:0]
-SystemC.CSR.data(30)[31:0]
-SystemC.CSR.data(31)[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

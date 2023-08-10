@@ -111,18 +111,20 @@ void BASE::SALU_CALC()
 
                 if (salutmp1.ins.ddd.branch == DecodeParams::B_J) // jal
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << " jump=true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
                 }
                 else if (salutmp1.ins.ddd.branch == DecodeParams::B_R) // jalr
                 {
-                    cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                    cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << " jump=true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
                     WARPS[salutmp1.warp_id]->branch_sig = true;
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = (salutmp1.rss3_data + salutmp1.ins.imm) & (~1);
                 }
+
                 break;
 
             // case AND_:
@@ -235,7 +237,7 @@ void BASE::SALU_CALC()
         }
         else
         {
-            cout << "SM" << sm_id << " SALU exec branch ins" << salutmp1.ins << "," << std::hex << salutmp1.ins.origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            cout << "SM" << sm_id << " warp " << salutmp1.warp_id << " 0x" << std::hex << salutmp1.ins.currentpc << " " << salutmp1.ins << " jump=";
             switch (salutmp1.ins.ddd.alu_fn)
             {
             // case BEQ_:
@@ -245,6 +247,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
 
@@ -255,6 +262,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
             // case BGEU_:
@@ -264,6 +276,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
             // case BLT_:
@@ -273,6 +290,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
             // case BLTU_:
@@ -282,6 +304,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
 
@@ -292,6 +319,11 @@ void BASE::SALU_CALC()
                 {
                     WARPS[salutmp1.warp_id]->jump = 1;
                     WARPS[salutmp1.warp_id]->jump_addr = salutmp1.rss3_data;
+                    cout << "true, jumpTO 0x" << std::hex << salutmp1.rss3_data << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+                else
+                {
+                    cout << "false at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 }
                 break;
             default:
@@ -363,6 +395,7 @@ void BASE::VALU_IN()
                 {
                     new_data.rsv1_data[i] = tovalu_data1[i];
                     new_data.rsv2_data[i] = tovalu_data2[i];
+                    new_data.rsv3_data[i] = tovalu_data3[i];
                 }
                 valu_dq.push(new_data);
                 a_delay = 3;
@@ -386,8 +419,6 @@ void BASE::VALU_IN()
                 }
                 break;
 
-            // case VADD_VV_:
-            // case VADD_VX_:
             default:
                 new_data.ins = emit_ins;
                 new_data.warp_id = emitins_warpid;
@@ -396,6 +427,10 @@ void BASE::VALU_IN()
                     new_data.rsv1_data[i] = tovalu_data1[i];
                     new_data.rsv2_data[i] = tovalu_data2[i];
                 }
+
+                // if (new_data.ins.origin32bit == (uint32_t)0x42026057)
+                //     cout << "valu vmv.s.x, rsv1_data=" << new_data.rsv1_data[0] << "\n";
+
                 valu_dq.push(new_data);
                 a_delay = 3;
                 b_delay = 1;
@@ -521,8 +556,17 @@ void BASE::VALU_CALC()
                     valutmp2.rdv1_data[i] = i;
                 break;
 
+            case DecodeParams::FN_A2ZERO:
+                // VMV.S.X
+                // 由于指令编码错误 现在当成vmv.v.x
+                // cout << "VALU_CALC switch to FN_A2ZERO, RSDATA=" << valutmp1.rsv1_data[0]
+                //      << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                for (int i = 0; i < num_thread; i++)
+                    valutmp2.rdv1_data[i] = valutmp1.rsv1_data[0];
+                break;
+
             default:
-                cout << "VALU_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "VALU_CALC warning: switch to unrecognized ins" << valutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
             valufifo.push(valutmp2);
@@ -532,7 +576,6 @@ void BASE::VALU_CALC()
             switch (valutmp1.ins.op)
             {
             case VBEQ_:
-                cout << "SM" << sm_id << "exec branch ins" << valutmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 for (int i = 0; i < num_thread; i++)
                 {
                     if (valutmp1.rsv1_data[i] == valutmp1.rsv2_data[i])
@@ -542,7 +585,22 @@ void BASE::VALU_CALC()
                 }
                 branch_elsemask = _velsemask;
                 branch_ifmask = ~_velsemask;
-                branch_elsepc = valutmp1.ins.currentpc + 4 + valutmp1.ins.d;
+                branch_elsepc = valutmp1.ins.currentpc + valutmp1.ins.d;
+                valuto_simtstk = true;
+                vbranch_ins = valutmp1.ins;
+                vbranchins_warpid = valutmp1.warp_id;
+                break;
+            case VBNE_:
+                for (int i = 0; i < num_thread; i++)
+                {
+                    if (valutmp1.rsv1_data[i] == valutmp1.rsv2_data[i])
+                        _velsemask[i] = 0;
+                    else
+                        _velsemask[i] = 1;
+                }
+                branch_elsemask = _velsemask;
+                branch_ifmask = ~_velsemask;
+                branch_elsepc = valutmp1.rsv3_data[0];
                 valuto_simtstk = true;
                 vbranch_ins = valutmp1.ins;
                 vbranchins_warpid = valutmp1.warp_id;
@@ -902,40 +960,46 @@ void BASE::LSU_IN()
                 cout << "lsu error: not ready at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             lsu_unready.notify();
+
+            new_data.ins = emit_ins;
+            new_data.warp_id = emitins_warpid;
+            new_data.rss1_data = tolsu_data1[0];
+            new_data.rss2_data = tolsu_data2[0];
+            new_data.rss3_data = tolsu_data3[0];
+            lsu_dq.push(new_data);
+            a_delay = 15;
+            b_delay = 5;
+            if (a_delay == 0)
+                lsu_eva.notify();
+            else if (lsueqa_triggered)
+                lsu_eqa.notify(sc_time((a_delay)*PERIOD, SC_NS));
+            else
+            {
+                lsu_eqa.notify(sc_time((a_delay)*PERIOD, SC_NS));
+                ev_lsufifo_pushed.notify();
+            }
+            if (b_delay == 0)
+                lsu_evb.notify();
+            else
+            {
+                lsu_eqb.notify(sc_time((b_delay)*PERIOD, SC_NS));
+                ev_lsuready_updated.notify();
+            }
+
+            cout << "SM" << sm_id << " warp " << emitins_warpid << " 0x" << std::hex << emit_ins.read().currentpc << " " << emit_ins << " LSU addr=" << std::hex << std::setw(8) << std::setfill('0');
             switch (emit_ins.read().op)
             {
             case LW_:
-            case SW_:
-            case VLE32_V_:
-                // cout << "LSU receive lw ins=" << emit_ins << "warp" << emitins_warpid << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                new_data.ins = emit_ins;
-                new_data.warp_id = emitins_warpid;
-                new_data.rss1_data = tolsu_data1[0];
-                new_data.rds1_data = tolsu_data2[0]; // for SW, store rs2data into ext_mem
-                lsu_dq.push(new_data);
-                a_delay = 5;
-                b_delay = 3;
-                if (a_delay == 0)
-                    lsu_eva.notify();
-                else if (lsueqa_triggered)
-                    lsu_eqa.notify(sc_time((a_delay)*PERIOD, SC_NS));
-                else
-                {
-                    lsu_eqa.notify(sc_time((a_delay)*PERIOD, SC_NS));
-                    ev_lsufifo_pushed.notify();
-                }
-                if (b_delay == 0)
-                    lsu_evb.notify();
-                else
-                {
-                    lsu_eqb.notify(sc_time((b_delay)*PERIOD, SC_NS));
-                    ev_lsuready_updated.notify();
-                }
+                cout << new_data.rss1_data << std::setw(0) << "+" << std::setw(8) << new_data.rss2_data;
                 break;
-            default:
-                cout << "lsu error: receive wrong ins " << emit_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            case SW_:
+                cout << new_data.rss1_data << std::setw(0) << "+" << std::setw(8) << new_data.rss2_data;
+                break;
+            case VLE32_V_:
+                cout << new_data.rss1_data;
                 break;
             }
+            cout << std::setw(0) << std::setfill(' ') << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         }
         else
         {
@@ -1068,89 +1132,75 @@ void BASE::SIMT_STACK(int warp_id)
             WARPS[warp_id]->vbran_sig = true;
             if (emito_simtstk)
                 cout << "SIMT-STACK error: receive join & beq at the same time at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-
-            cout << "SM" << sm_id << " warp" << warp_id << " SIMT_STK receive branch ins" << vbranch_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-
             /*** 以下为stack管理 ***/
             if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == 0)
             { // VALU计算出的elsemask全为0
-                newstkelem.pair = 1;
-                newstkelem.is_part = 1;
+              // newstkelem.pair = 1;
+              // newstkelem.is_part = 1;
             }
             else if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == std::bitset<num_thread>().set())
-            { // VALU计算出的ifmask全为0
-                newstkelem.pair = 0;
-                newstkelem.is_part = 1;
+            { // VALU计算出的ifmask全为0, elsemask全为1
+              // newstkelem.pair = 0;
+              // newstkelem.is_part = 1;
             }
             else
             {
-                newstkelem.pair = 0;
-                newstkelem.is_part = 0;
+                newstkelem.rpc = WARPS[warp_id]->CSR_reg[0x80c];
+                newstkelem.nextpc = WARPS[warp_id]->CSR_reg[0x80c];
+                newstkelem.nextmask = vbranch_ins.read().mask;
+                WARPS[warp_id]->simt_stack.push(newstkelem);
+                cout << "SIMT-stack warp" << warp_id << " pushed elem" << newstkelem << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
+                newstkelem.nextpc = branch_elsepc;
+                newstkelem.nextmask = branch_elsemask;
+                WARPS[warp_id]->simt_stack.push(newstkelem);
+                cout << "SIMT-stack warp" << warp_id << " pushed elem" << newstkelem << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
-            newstkelem.rmask = vbranch_ins.read().mask;
-            newstkelem.elsepc = branch_elsepc;
-            newstkelem.elsemask = branch_elsemask;
-            WARPS[warp_id]->simt_stack.push(newstkelem);
-            cout << "SIMT-stack warp" << warp_id << " pushed elem" << newstkelem << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
             /*** 以下为分支控制 ***/
-            if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == std::bitset<num_thread>().set())
-            { // ifmask全为0
+            if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == 0)
+            { // elsemask全为0，不跳转
+                // 什么也不做
+                cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << vbranch_ins.read().currentpc << std::dec
+                     << " " << vbranch_ins
+                     << " join " << vbranch_ins.read().mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            }
+            else if (std::bitset<num_thread>(branch_elsemask.read().to_string()) == std::bitset<num_thread>().set())
+            { // ifmask全为0，elsemask全为1
                 WARPS[warp_id]->simtstk_jumpaddr = branch_elsepc;
-                WARPS[warp_id]->current_mask = branch_elsemask;
+                WARPS[warp_id]->current_mask = branch_elsemask; // 全为1
                 WARPS[warp_id]->simtstk_jump = true;
                 WARPS[warp_id]->simtstk_flush = true;
+                cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << vbranch_ins.read().currentpc << std::dec
+                     << " " << vbranch_ins
+                     << " elsepath(jump) " << branch_elsemask << " jumpTO 0x"
+                     << std::hex << branch_elsepc << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             else
-            { // 需要先走if path
-                WARPS[warp_id]->current_mask = branch_ifmask;
+            { // 暂时默认先走if path
+                cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << vbranch_ins.read().currentpc << std::dec
+                     << " " << vbranch_ins
+                     << " ifpath(pc+4) " << branch_ifmask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
         }
         if (emito_simtstk && emitins_warpid == warp_id) // OPC发射的join指令
         {
             cout << "SM" << sm_id << " warp" << warp_id << " SIMT_STK receive join ins" << emit_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             WARPS[warp_id]->vbran_sig = true;
-            simtstack_t &tmpstkelem = WARPS[warp_id]->simt_stack.top();
-            readins = emit_ins;
             /*** 以下为分支控制 ***/
-            if (tmpstkelem.pair == 1)
-            { // 意味着elsemask全为0，此时遇到的是if path的join
-                // ↓直接跳转到汇合点，跳转地址是join指令的跳转地址
-                WARPS[warp_id]->simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
-                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
-                WARPS[warp_id]->simtstk_jump = true;
-                WARPS[warp_id]->simtstk_flush = true;
-            }
-            else if (tmpstkelem.is_part == 1 && readins.d == 1)
-            { // else path结束，汇合点紧跟着else path的指令
-                // 所以readins.d==1，即join指令的相对跳转为1，
-                // 这意味着else path紧跟着汇合点，不需要冲刷
-                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
-                WARPS[warp_id]->simtstk_jump = false;
-                WARPS[warp_id]->simtstk_flush = false;
-            }
-            else if (tmpstkelem.is_part == 1)
-            { // else path结束，汇合点紧跟着else path的指令
-                // 所以readins.d==1，即join指令的跳转为1
-                WARPS[warp_id]->simtstk_jumpaddr = readins.currentpc + 4 + readins.d;
-                WARPS[warp_id]->current_mask = tmpstkelem.rmask;
-                WARPS[warp_id]->simtstk_jump = true;
-                WARPS[warp_id]->simtstk_flush = true;
-            }
-            else
+            if (!WARPS[warp_id]->simt_stack.empty())
             {
-                WARPS[warp_id]->current_mask = tmpstkelem.elsemask;
-                // 不用跳转到else pc???
-            }
+                simtstack_t &tmpstkelem = WARPS[warp_id]->simt_stack.top();
+                readins = emit_ins;
+                if (readins.currentpc == tmpstkelem.rpc)
+                {
+                    WARPS[warp_id]->simtstk_jumpaddr = tmpstkelem.nextpc;
+                    WARPS[warp_id]->current_mask = tmpstkelem.nextmask;
 
-            /*** 以下为stack管理 ***/
-            if (tmpstkelem.is_part == 1)
-            {
-                WARPS[warp_id]->simt_stack.pop();
-            }
-            else
-            {
-                tmpstkelem.is_part = 1;
+                    WARPS[warp_id]->simtstk_jump = true;
+                    WARPS[warp_id]->simtstk_flush = true;
+                    WARPS[warp_id]->simt_stack.pop();
+                }
             }
         }
     }
@@ -1174,14 +1224,8 @@ void BASE::CSR_IN()
             new_data.ins = emit_ins;
             new_data.warp_id = emitins_warpid;
 
-            if (new_data.ins.ddd.sel_alu1 == DecodeParams::A1_VRS1)
-                cout << "CSR error: receive vector inst at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            else if (new_data.ins.ddd.sel_alu1 == DecodeParams::A1_RS1)
-                new_data.csrSdata1 = tocsr_data1;
-            if (new_data.ins.ddd.sel_alu2 == DecodeParams::A2_VRS2)
-                cout << "CSR error: receive vector inst at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-            else if (new_data.ins.ddd.sel_alu2 == DecodeParams::A2_RS2)
-                new_data.csrSdata2 = tocsr_data2;
+            new_data.csrSdata1 = tocsr_data1;
+            new_data.csrSdata2 = tocsr_data2;
 
             csr_dq.push(new_data);
             // if (sm_id == 0)
@@ -1247,40 +1291,44 @@ void BASE::CSR_CALC()
                 // case DecodeParams::FN_ADD:
                 t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.csrSdata1;
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case CSRRS_:
                 t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
-                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.csrSdata1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t | csrtmp1.csrSdata1;
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case CSRRC_:
                 t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
                 WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.csrSdata1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case CSRRWI_:
                 csrtmp2.data = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case CSRRSI_:
                 t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
                 WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = csrtmp1.ins.s1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case CSRRCI_:
                 t = WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr];
                 csrtmp2.data = t;
                 WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] = t & ~csrtmp1.ins.s1;
-                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "SM" << sm_id << " warp" << csrtmp1.warp_id << " write CSR[0x" << std::hex << csr_addr << "]=0x" << WARPS[csrtmp1.warp_id]->CSR_reg[csr_addr] << std::dec << " by ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             case VSETVLI_:
-                csrtmp2.data = num_thread;
+                csrtmp2.data = mtd.wf_size;
+                break;
+            case SETRPC_:
+                WARPS[csrtmp1.warp_id]->CSR_reg[0x80c] = csrtmp1.csrSdata1 + csrtmp1.csrSdata2;
+                csrtmp2.data = 0;
                 break;
             default:
                 cout << "CSR_CALC warning: switch to unrecognized ins" << csrtmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
@@ -1441,7 +1489,7 @@ void BASE::MUL_CALC()
             {
 
             default:
-                cout << "MUL_CALC warning: switch to unrecognized ins at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                cout << "MUL_CALC warning: switch to unrecognized ins" << multmp1.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 break;
             }
         }
@@ -1577,17 +1625,39 @@ void BASE::SFU_CALC()
                 if (sfutmp1.ins.ddd.isvec)
                 {
                     if (sfutmp1.ins.ddd.reverse)
-                        for (int i = 0; i < num_thread; i++)
-                        {
-                            if (sfutmp2.ins.mask[i] == 1)
-                                sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] % sfutmp1.rsv1_data[i];
+                    {
+                        if (sfutmp1.ins.ddd.sel_alu1 == DecodeParams::A1_RS1)
+                        { // VREMU.VX
+                            for (int i = 0; i < num_thread; i++)
+                            {
+                                if (sfutmp2.ins.mask[i] == 1)
+                                {
+                                    sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] % sfutmp1.rsv1_data[0];
+                                }
+                            }
                         }
+                        else
+                        {
+                            for (int i = 0; i < num_thread; i++)
+                            {
+                                if (sfutmp2.ins.mask[i] == 1)
+                                {
+                                    if ((unsigned)sfutmp1.rsv1_data[i] != 0)
+                                        sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] % sfutmp1.rsv1_data[i];
+                                    else
+                                        cout << "SFU_CALC error: ins " << sfutmp1.ins << " rsv1_data[" << i << "]=0 at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                                }
+                            }
+                        }
+                    }
                     else
+                    {
                         for (int i = 0; i < num_thread; i++)
                         {
                             if (sfutmp2.ins.mask[i] == 1)
                                 sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv1_data[i] % sfutmp1.rsv2_data[i];
                         }
+                    }
                 }
                 else
                     sfutmp2.rdv1_data[0] = (unsigned)sfutmp1.rsv1_data[0] % sfutmp1.rsv2_data[0];
@@ -1601,7 +1671,12 @@ void BASE::SFU_CALC()
                         for (int i = 0; i < num_thread; i++)
                         {
                             if (sfutmp2.ins.mask[i] == 1)
-                                sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] / (unsigned)sfutmp1.rsv1_data[i];
+                            {
+                                if ((unsigned)sfutmp1.rsv1_data[i] != 0)
+                                    sfutmp2.rdv1_data[i] = (unsigned)sfutmp1.rsv2_data[i] / (unsigned)sfutmp1.rsv1_data[i];
+                                else
+                                    cout << "SFU_CALC error: ins " << sfutmp1.ins << " rsv1_data[" << i << "]=0 at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                            }
                         }
                     else
                         for (int i = 0; i < num_thread; i++)

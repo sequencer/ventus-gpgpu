@@ -108,13 +108,14 @@ void BASE::INSTRUCTION_REG(int warp_id)
             if (WARPS[warp_id]->jump == 1 |
                 WARPS[warp_id]->simtstk_jump == 1)
             {
-                WARPS[warp_id]->fetch_valid2 = false;
+                WARPS[warp_id]->fetch_valid12 = false;
+                WARPS[warp_id]->ev_decode.notify();
             }
             else if (WARPS[warp_id]->ibuf_empty |
                      (!WARPS[warp_id]->ibuf_full |
                       (WARPS[warp_id]->dispatch_warp_valid && (!opc_full | doemit))))
             {
-                WARPS[warp_id]->fetch_valid2 = WARPS[warp_id]->fetch_valid;
+                WARPS[warp_id]->fetch_valid12 = WARPS[warp_id]->fetch_valid;
                 if (inssrc == "ireg")
                     WARPS[warp_id]->fetch_ins =
                         (WARPS[warp_id]->pc.read() >= 0)
@@ -174,13 +175,13 @@ void BASE::cycle_IBUF_ACTION(int warp_id, I_TYPE &dispatch_ins_, I_TYPE &_readda
         {
             if (WARPS[warp_id]->ififo.isfull())
             {
-                // cout << "IBUF ERROR: ibuf is full but is sent an ins from FETCH at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
+                // cout << "SM" << sm_id << " warp" << warp_id << " IFIFO is full(not error) at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             else
             {
                 WARPS[warp_id]->ififo.push(WARPS[warp_id]->decode_ins.read());
                 WARPS[warp_id]->ibuf_swallow = true;
-                // if (sm_id == 0 && warp_id == 0)
+                // if (sm_id == 0 && warp_id == 1)
                 //     cout << "SM" << sm_id << " warp" << warp_id << " IFIFO push decode_ins.bit=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             }
             // cout << "before put, ififo has " << ififo.used() << " elems at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
@@ -219,6 +220,7 @@ void BASE::IBUF_ACTION(int warp_id)
         wait(clk.posedge_event());
         // cout << "SM" << sm_id << " warp" << warp_id << " IBUF_ACTION: start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
         // cout << "IBUF_ACTION warp" << warp_id << ": start at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+
         if (WARPS[warp_id]->is_warp_activated)
         {
             cycle_IBUF_ACTION(warp_id, dispatch_ins_, _readdata3);
@@ -389,11 +391,11 @@ void BASE::BEFORE_DISPATCH(int warp_id)
         wait(ev_warp_assigned);
         if (WARPS[warp_id]->is_warp_activated)
         {
-            if (sm_id == 0 && warp_id == 0)
-                // cout << "SM" << sm_id << " warp" << warp_id << " before action, fetch_valid2=" << WARPS[warp_id]->fetch_valid2 << ", decode_ins=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit
-                //      << std::dec << ", jump=" << WARPS[warp_id]->jump << ", ififo.isfull=" << WARPS[warp_id]->ififo.isfull() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            // if (sm_id == 0 && warp_id == 0)
+            // cout << "SM" << sm_id << " warp" << warp_id << " before action, fetch_valid2=" << WARPS[warp_id]->fetch_valid2 << ", decode_ins=" << std::hex << WARPS[warp_id]->decode_ins.read().origin32bit
+            //      << std::dec << ", jump=" << WARPS[warp_id]->jump << ", ififo.isfull=" << WARPS[warp_id]->ififo.isfull() << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
 
-                cycle_IBUF_ACTION(warp_id, dispatch_ins_, _readdata3);
+            cycle_IBUF_ACTION(warp_id, dispatch_ins_, _readdata3);
             cycle_UPDATE_SCORE(warp_id, tmpins, it, regtype_, insertscore);
             cycle_JUDGE_DISPATCH(warp_id, _readibuf);
             WARPS[warp_id]->ev_issue.notify();
@@ -556,7 +558,7 @@ void BASE::READ_REG()
                 // cout << "从regfile读出: REGselectIdx[" << i << "] to opc(" << REGselectIdx[i].first << "," << REGselectIdx[i].second << ") at " << sc_time_stamp() <<","<< sc_delta_count_at_current_time() << "\n";
                 if (opc_banktype[row][col] == 0)
                 {
-                    read_data[i][0] = WARPS[tmp.warp_id]->s_regfile[tmp.addr];
+                    read_data[i].fill(WARPS[tmp.warp_id]->s_regfile[tmp.addr]);
                 }
                 else
                 {
@@ -644,7 +646,7 @@ void BASE::WRITE_BACK()
         if (salufifo_empty == false)
         {
             // if (sm_id == 0)
-            //     cout << "SM" << sm_id << " WB judge popsalu, write_s=true, salutop.ins=" << salutop_dat.ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+            //     cout << "SM" << sm_id << " WB judge popsalu, write_s=true, salutop.ins=" << salutop_dat.ins << ",pc=" << std::hex << salutop_dat.ins.currentpc << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             write_s = true;
             write_v = false;
             wb_ena = true;
@@ -821,19 +823,31 @@ void BASE::WRITE_REG(int warp_id)
             // 后续regfile要一次只能写一个，否则报错
             if (write_s)
             {
-                cout << "SM" << sm_id << " warp" << warp_id << " WRITE_REG ins" << wb_ins
-                     << ": scalar, s_regfile[" << std::dec << rds1_addr.read() << "]=" << std::hex << rds1_data << std::dec
-                     << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                if (warp_id == 0)
+                    cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << wb_ins.read().currentpc << std::dec
+                         << " " << wb_ins
+                         << " x " << std::setfill('0') << std::setw(3) << rds1_addr.read() << " "
+                         << std::hex << std::setw(8)
+                         << rds1_data
+                         << std::dec << std::setfill(' ') << std::setw(0)
+                         << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 WARPS[warp_id]->s_regfile[rds1_addr.read()] = rds1_data;
             }
             if (write_v)
             {
-                cout << "SM" << sm_id << " warp" << warp_id << "WRITE_REG ins" << wb_ins
-                     << ": vector, v_regfile[" << std::dec << rdv1_addr.read() << "]={" << std::hex
-                     << rdv1_data[0] << "," << rdv1_data[1] << "," << rdv1_data[2] << "," << rdv1_data[3] << ","
-                     << rdv1_data[4] << "," << rdv1_data[5] << "," << rdv1_data[6] << "," << rdv1_data[7]
-                     << std::dec
-                     << "}, mask=" << wb_ins.read().mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                if (warp_id == 0)
+                {
+                    cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << wb_ins.read().currentpc << std::dec
+                         << " " << wb_ins
+                         << " v " << std::setfill('0') << std::setw(3) << rdv1_addr.read() << " "
+                         << std::hex << std::setw(8);
+                    for (int j = 0; j < num_thread - 1; j++)
+                        cout << rdv1_data[j] << ",";
+                    cout << rdv1_data[num_thread - 1];
+                    cout << std::dec << std::setfill(' ') << std::setw(0)
+                         << "; mask=" << wb_ins.read().mask << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
+                }
+
                 for (int i = 0; i < num_thread; i++)
                     if (wb_ins.read().mask[i] == 1)
                         WARPS[warp_id]->v_regfile[rdv1_addr.read()][i] = rdv1_data[i];

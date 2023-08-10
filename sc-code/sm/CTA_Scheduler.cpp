@@ -169,12 +169,15 @@ void CTA_Scheduler::activate_warp()
 
             cout << "CTA: SM" << i << " warp" << warp_counter << " is activated\n";
             sm_group[i]->WARPS[warp_counter]->is_warp_activated = true;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x800] = warp_counter * 8;
+
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x300] = 0x00001800;
+
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x800] = (mtd.wg_size - warp_counter - 1) * num_thread;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x801] = mtd.wg_size;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x802] = num_thread;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x803] = mtd.metaDataBaseAddr;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x804] = 0;
-            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x805] = warp_counter;
+            sm_group[i]->WARPS[warp_counter]->CSR_reg[0x805] = (mtd.wg_size - warp_counter - 1);    // warp标号反了
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x806] = 0x70000000;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x807] = 0;
             sm_group[i]->WARPS[warp_counter]->CSR_reg[0x808] = 0;

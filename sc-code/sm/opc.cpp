@@ -118,7 +118,7 @@ void BASE::OPC_FIFO()
                 }
                 else if (_readdata4.ddd.sel_alu3 == DecodeParams::A3_PC && _readdata4.ddd.branch != DecodeParams::B_R)
                 { // jal
-                    
+
                     newopcdat.data[2].fill(_readdata4.imm + _readdata4.currentpc);
                 }
                 else if (_readdata4.ddd.sel_alu3 == DecodeParams::A3_PC)
@@ -150,19 +150,8 @@ void BASE::OPC_FIFO()
                 // opcfifo.push(opcfifo_t(_readdata4, _readwarpid,
                 //                        in_ready, in_valid, in_srcaddr, in_banktype));
 
-                if (_readdata4.origin32bit == (uint32_t)0x00008067)
-                {
-                    cout << "SM" << sm_id << " OPC_FIFO get ins ret from warp" << _readwarpid << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                    newopcdat.valid = {0, 0, 0};
-                    newopcdat.ready = {1, 1, 1};
-                }
-
                 opcfifo.push(newopcdat);
 
-                if (sm_id == 0 && _readdata4.origin32bit == (uint32_t)0x5208a157)
-                    cout << "SM" << sm_id << " OPC: receive dispatch ins " << std::hex << _readdata4.origin32bit << std::dec
-                         << ", in_ready=" << coutArray(in_ready) << ", in_valid=" << coutArray(in_valid)
-                         << ", sel_execunit=" << magic_enum::enum_name(_readdata4.ddd.sel_execunit) << "\n";
             }
         }
         opcfifo_elem_num = opcfifo.get_size();
@@ -230,11 +219,6 @@ void BASE::OPC_EMIT()
                 emit_ins = opcfifo[entryidx].ins;
                 emitins_warpid = opcfifo[entryidx].warp_id;
 
-                if (opcfifo[entryidx].ins.origin32bit == (uint32_t)0x00008067)
-                {
-                    cout << "SM" << sm_id << " OPC_EMIT will emit ins ret from warp" << opcfifo[entryidx].warp_id << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
-                }
-
                 // cout << "opcfifo[" << entryidx << "]-" << emit_ins << "is all ready, at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                 switch (opcfifo[entryidx].ins.ddd.sel_execunit)
                 {
@@ -270,6 +254,7 @@ void BASE::OPC_EMIT()
                         {
                             tovalu_data1[j] = opcfifo[entryidx].data[0][j];
                             tovalu_data2[j] = opcfifo[entryidx].data[1][j];
+                            tovalu_data3[j] = opcfifo[entryidx].data[2][j];
                         }
 
                         // if (opcfifo[entryidx].ins.ddd.sel_alu2 == DecodeParams::A2_VRS2)
@@ -326,16 +311,13 @@ void BASE::OPC_EMIT()
                         findemit = 1;
                         doemit = true;
                         emito_lsu = true;
-                        if (opcfifo[entryidx].ins.ddd.sel_alu1 == DecodeParams::A1_VRS1)
-                            for (int j = 0; j < num_thread; j++)
-                                tolsu_data1[j] = opcfifo[entryidx].data[0][j];
-                        else if (opcfifo[entryidx].ins.ddd.sel_alu1 == DecodeParams::A1_RS1)
-                            tolsu_data1[0] = opcfifo[entryidx].data[0][0];
-                        if (opcfifo[entryidx].ins.ddd.sel_alu2 == DecodeParams::A2_VRS2)
-                            for (int j = 0; j < num_thread; j++)
-                                tolsu_data2[j] = opcfifo[entryidx].data[1][j];
-                        else if (opcfifo[entryidx].ins.ddd.sel_alu2 == DecodeParams::A2_RS2)
-                            tolsu_data2[0] = opcfifo[entryidx].data[1][0];
+
+                        for (int j = 0; j < num_thread; j++){
+                            tolsu_data1[j] = opcfifo[entryidx].data[0][j];
+                            tolsu_data2[j] = opcfifo[entryidx].data[1][j];
+                            tolsu_data3[j] = opcfifo[entryidx].data[2][j];
+                        }
+
                     }
                     break;
 

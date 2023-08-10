@@ -108,7 +108,6 @@ int sc_main(int argc, char *argv[])
         sc_trace(tf[i], BASE_impl[0]->emito_valu, "emito_valu");
         sc_trace(tf[i], BASE_impl[0]->emito_vfpu, "emito_vfpu");
         sc_trace(tf[i], BASE_impl[0]->emito_lsu, "emito_lsu");
-
         // salu
         sc_trace(tf[i], BASE_impl[0]->tosalu_data1, "tosalu_data.data1");
         sc_trace(tf[i], BASE_impl[0]->tosalu_data2, "tosalu_data.data2");
@@ -157,6 +156,7 @@ int sc_main(int argc, char *argv[])
         sc_trace(tf[i], BASE_impl[0]->wb_warpid, "wb_warpid");
         for (int j = 0; j < 32; j++)
             sc_trace(tf[i], BASE_impl[0]->WARPS[i]->s_regfile[j], "s_regfile.data(" + std::to_string(j) + ")");
+
         sc_trace(tf[i], BASE_impl[0]->WARPS[i]->v_regfile[0][0], "v_regfile(0)(0)");
         sc_trace(tf[i], BASE_impl[0]->WARPS[i]->v_regfile[1][0], "v_regfile(1)(0)");
         sc_trace(tf[i], BASE_impl[0]->WARPS[i]->v_regfile[2][0], "v_regfile(2)(0)");

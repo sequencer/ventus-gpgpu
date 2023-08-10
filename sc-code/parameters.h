@@ -13,13 +13,14 @@
 #include <math.h>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <unordered_map>
 #include "magic_enum.hpp"
 
 inline constexpr int num_warp = 4;
 inline constexpr int depth_warp = 2;
 inline constexpr int xLen = 32;
-inline constexpr long unsigned int num_thread = 8;
+inline constexpr long unsigned int num_thread = 4;
 inline constexpr int ireg_bitsize = 10;
 inline constexpr int ireg_size = 1 << ireg_bitsize;
 inline constexpr int INS_LENGTH = 32; // the length of per instruction
@@ -911,10 +912,11 @@ public:
     I_TYPE(I_TYPE _ins, int _currentpc) : origin32bit(_ins.origin32bit), op(_ins.op), d(_ins.d), s1(_ins.s1), s2(_ins.s2), s3(_ins.s3), currentpc(_currentpc){};
     bool operator==(const I_TYPE &rhs) const
     {
-        return rhs.origin32bit == origin32bit && rhs.op == op && rhs.s1 == s1 && rhs.s2 == s2 && rhs.s3 == s3 && rhs.d == d;
+        return rhs.origin32bit == origin32bit && rhs.op == op && rhs.s1 == s1 && rhs.s2 == s2 && rhs.s3 == s3 && rhs.d == d && rhs.currentpc == currentpc;
     }
     I_TYPE &operator=(const I_TYPE &rhs)
     {
+        currentpc = rhs.currentpc;
         origin32bit = rhs.origin32bit;
         op = rhs.op;
         d = rhs.d;
@@ -923,14 +925,12 @@ public:
         s3 = rhs.s3;
         imm = rhs.imm;
         ddd = rhs.ddd;
-        // jump_addr = rhs.jump_addr;
-        currentpc = rhs.currentpc;
         mask = rhs.mask;
         return *this;
     }
     friend ostream &operator<<(ostream &os, I_TYPE const &v)
     {
-        os << "(" << (magic_enum::enum_name((OP_TYPE)v.op)) << "," << v.d << "," << v.s1 << "," << v.s2 << "," << v.s3 << ")," << std::hex << v.origin32bit << std::dec;
+        os << std::setw(18) << (magic_enum::enum_name((OP_TYPE)v.op)) << std::setfill('0') << std::setw(8) << std::hex << v.origin32bit << std::dec << std::setfill(' ') << std::setw(0);
         return os;
     }
     friend void sc_trace(sc_trace_file *tf, const I_TYPE &v, const std::string &NAME)
@@ -945,6 +945,14 @@ public:
         // sc_trace(tf, v.jump_addr, NAME + ".jump_addr");
         sc_trace(tf, v.mask, NAME + ".mask");
         sc_trace(tf, v.currentpc, NAME + ".currentpc");
+    }
+
+private:
+    static std::string fixedLengthString(const std::string &str, size_t length)
+    {
+        std::ostringstream oss;
+        oss << std::setw(length) << std::left << str;
+        return oss.str();
     }
 };
 // typename I_TYPE sc_uint<INS_LENGTH>;
@@ -1253,8 +1261,7 @@ struct valu_in_t
 {
     I_TYPE ins;
     int warp_id;
-    std::array<reg_t, num_thread> rsv1_data, rsv2_data;
-    reg_t rss1_data;
+    std::array<reg_t, num_thread> rsv1_data, rsv2_data, rsv3_data;
 };
 struct valu_out_t
 {
@@ -1287,14 +1294,9 @@ struct valu_out_t
     friend void sc_trace(sc_trace_file *tf, const valu_out_t &v, const std::string &NAME)
     {
         sc_trace(tf, v.ins, NAME + ".ins");
-        sc_trace(tf, v.rdv1_data[0], NAME + ".rdv1_data(0)");
-        sc_trace(tf, v.rdv1_data[1], NAME + ".rdv1_data(1)");
-        sc_trace(tf, v.rdv1_data[2], NAME + ".rdv1_data(2)");
-        sc_trace(tf, v.rdv1_data[3], NAME + ".rdv1_data(3)");
-        sc_trace(tf, v.rdv1_data[4], NAME + ".rdv1_data(4)");
-        sc_trace(tf, v.rdv1_data[5], NAME + ".rdv1_data(5)");
-        sc_trace(tf, v.rdv1_data[6], NAME + ".rdv1_data(6)");
-        sc_trace(tf, v.rdv1_data[7], NAME + ".rdv1_data(7)");
+        for (int i = 0; i < num_thread; i++)
+            sc_trace(tf, v.rdv1_data[i], NAME + ".rdv1_data(" + std::to_string(i) + ")");
+
         sc_trace(tf, v.warp_id, NAME + ".warp_id");
     }
 };
@@ -1336,14 +1338,8 @@ struct vfpu_out_t
     friend void sc_trace(sc_trace_file *tf, const vfpu_out_t &v, const std::string &NAME)
     {
         sc_trace(tf, v.ins, NAME + ".ins");
-        sc_trace(tf, v.rdf1_data[0], NAME + ".rdf1_data(0)");
-        sc_trace(tf, v.rdf1_data[1], NAME + ".rdf1_data(1)");
-        sc_trace(tf, v.rdf1_data[2], NAME + ".rdf1_data(2)");
-        sc_trace(tf, v.rdf1_data[3], NAME + ".rdf1_data(3)");
-        sc_trace(tf, v.rdf1_data[4], NAME + ".rdf1_data(4)");
-        sc_trace(tf, v.rdf1_data[5], NAME + ".rdf1_data(5)");
-        sc_trace(tf, v.rdf1_data[6], NAME + ".rdf1_data(6)");
-        sc_trace(tf, v.rdf1_data[7], NAME + ".rdf1_data(7)");
+        for (int i = 0; i < num_thread; i++)
+            sc_trace(tf, v.rdf1_data[i], NAME + ".rdf1_data(" + std::to_string(i) + ")");
         sc_trace(tf, v.warp_id, NAME + ".warp_id");
     }
 };
@@ -1403,22 +1399,9 @@ struct lsu_out_t
     {
         sc_trace(tf, v.ins, NAME + ".ins");
         sc_trace(tf, v.rds1_data, NAME + ".rds1_data");
-        sc_trace(tf, v.rdv1_data[0], NAME + ".rdv1_data(0)");
-        sc_trace(tf, v.rdv1_data[1], NAME + ".rdv1_data(1)");
-        sc_trace(tf, v.rdv1_data[2], NAME + ".rdv1_data(2)");
-        sc_trace(tf, v.rdv1_data[3], NAME + ".rdv1_data(3)");
-        sc_trace(tf, v.rdv1_data[4], NAME + ".rdv1_data(4)");
-        sc_trace(tf, v.rdv1_data[5], NAME + ".rdv1_data(5)");
-        sc_trace(tf, v.rdv1_data[6], NAME + ".rdv1_data(6)");
-        sc_trace(tf, v.rdv1_data[7], NAME + ".rdv1_data(7)");
-        sc_trace(tf, v.rdf1_data[0], NAME + ".rdf1_data(0)");
-        sc_trace(tf, v.rdf1_data[1], NAME + ".rdf1_data(1)");
-        sc_trace(tf, v.rdf1_data[2], NAME + ".rdf1_data(2)");
-        sc_trace(tf, v.rdf1_data[3], NAME + ".rdf1_data(3)");
-        sc_trace(tf, v.rdf1_data[4], NAME + ".rdf1_data(4)");
-        sc_trace(tf, v.rdf1_data[5], NAME + ".rdf1_data(5)");
-        sc_trace(tf, v.rdf1_data[6], NAME + ".rdf1_data(6)");
-        sc_trace(tf, v.rdf1_data[7], NAME + ".rdf1_data(7)");
+        for (int i = 0; i < num_thread; i++)
+            sc_trace(tf, v.rdv1_data[i], NAME + ".rdv1_data(" + std::to_string(i) + ")");
+
         sc_trace(tf, v.warp_id, NAME + ".warp_id");
     }
 };
@@ -1428,15 +1411,13 @@ class simtstack_t
     // 对于SIMT-stack来说，else分支（对于elsemask等数据）指的是分支指令判断跳转的path，
     // 无论是beq还是bne，也不用管编程模型定义的if和else。
 public:
-    int rpc;                 // 在ventus中没有用处，因为存入simt-stack时不知道rpc
-    sc_bv<num_thread> rmask; // 汇合点mask
-    int elsepc;
-    sc_bv<num_thread> elsemask;
-    bool is_part;
-    bool pair;
+    uint32_t rpc;
+    uint32_t nextpc;
+    sc_bv<num_thread> nextmask; // 汇合点mask
+
     friend ostream &operator<<(ostream &os, simtstack_t const &v)
     {
-        os << "(rmask:" << v.rmask << ",elsemask:" << v.elsemask << ",elsepc:" << std::hex << v.elsepc << std::dec << ",ispart" << v.is_part << ",pair" << v.pair << ")";
+        os << "(rpc:" << std::hex << v.rpc << "|nextpc:" << v.nextpc << std::dec << "|nextmask:" << v.nextmask << ")";
         return os;
     }
 };
@@ -1513,14 +1494,8 @@ struct mul_out_t
     friend void sc_trace(sc_trace_file *tf, const mul_out_t &v, const std::string &NAME)
     {
         sc_trace(tf, v.ins, NAME + ".ins");
-        sc_trace(tf, v.rdv1_data[0], NAME + ".rdv1_data(0)");
-        sc_trace(tf, v.rdv1_data[1], NAME + ".rdv1_data(1)");
-        sc_trace(tf, v.rdv1_data[2], NAME + ".rdv1_data(2)");
-        sc_trace(tf, v.rdv1_data[3], NAME + ".rdv1_data(3)");
-        sc_trace(tf, v.rdv1_data[4], NAME + ".rdv1_data(4)");
-        sc_trace(tf, v.rdv1_data[5], NAME + ".rdv1_data(5)");
-        sc_trace(tf, v.rdv1_data[6], NAME + ".rdv1_data(6)");
-        sc_trace(tf, v.rdv1_data[7], NAME + ".rdv1_data(7)");
+        for (int i = 0; i < num_thread; i++)
+            sc_trace(tf, v.rdv1_data[i], NAME + ".rdv1_data(" + std::to_string(i) + ")");
         sc_trace(tf, v.warp_id, NAME + ".warp_id");
     }
 };
@@ -1563,14 +1538,8 @@ struct sfu_out_t
     friend void sc_trace(sc_trace_file *tf, const sfu_out_t &v, const std::string &NAME)
     {
         sc_trace(tf, v.ins, NAME + ".ins");
-        sc_trace(tf, v.rdv1_data[0], NAME + ".rdv1_data(0)");
-        sc_trace(tf, v.rdv1_data[1], NAME + ".rdv1_data(1)");
-        sc_trace(tf, v.rdv1_data[2], NAME + ".rdv1_data(2)");
-        sc_trace(tf, v.rdv1_data[3], NAME + ".rdv1_data(3)");
-        sc_trace(tf, v.rdv1_data[4], NAME + ".rdv1_data(4)");
-        sc_trace(tf, v.rdv1_data[5], NAME + ".rdv1_data(5)");
-        sc_trace(tf, v.rdv1_data[6], NAME + ".rdv1_data(6)");
-        sc_trace(tf, v.rdv1_data[7], NAME + ".rdv1_data(7)");
+        for (int i = 0; i < num_thread; i++)
+            sc_trace(tf, v.rdv1_data[i], NAME + ".rdv1_data(" + std::to_string(i) + ")");
         sc_trace(tf, v.warp_id, NAME + ".warp_id");
     }
 };
@@ -1604,8 +1573,10 @@ public:
 
     // fetch
     sc_event ev_fetchpc, ev_decode;
-    sc_signal<bool> ibuf_swallow;                                 // 表示是否接收上一cycle fetch_valid，相当于ready
-    sc_signal<bool> fetch_valid, fetch_valid2;                    // 2是真正的valid，直接与ibuffer沟通
+    sc_signal<bool> ibuf_swallow; // 表示是否接收上一cycle fetch_valid，相当于ready
+    sc_signal<bool> fetch_valid;
+    sc_signal<bool, SC_MANY_WRITERS> fetch_valid2;                // 2是真正的valid，直接与ibuffer沟通
+    bool fetch_valid12;                                           // 用于取指令和decode之间传递
     sc_signal<bool, SC_MANY_WRITERS> jump, branch_sig, vbran_sig; // 无论是否jump，只要发生了分支判断，将branch_sig置为1
     sc_signal<int> jump_addr, pc;
     I_TYPE fetch_ins;
@@ -1626,8 +1597,8 @@ public:
     // issue
     sc_event ev_issue;
     // regfile
-    std::array<reg_t, 32> s_regfile;
-    std::array<v_regfile_t, 32> v_regfile;
+    std::array<reg_t, 0x40> s_regfile;
+    std::array<v_regfile_t, 0x40> v_regfile;
     std::array<int, 0x820> CSR_reg;
     // simt-stack
     std::stack<simtstack_t> simt_stack;
@@ -1670,13 +1641,10 @@ struct meta_data
     uint64_t *buffer_size;      ///> 各buffer的size，以Bytes为单位。实际使用的大小，用于初始化.data
     uint64_t *buffer_allocsize; ///> 各buffer的size，以Bytes为单位。分配的大小
 
-    int insBufferIndex;         // 指令在哪一个buffer
-
+    int insBufferIndex; // 指令在哪一个buffer
 };
 
-uint32_t extractBits32(uint32_t number, int start, int end) {
-    return (number >> end) & ((1 << (start - end + 1)) - 1);
-}
+uint32_t extractBits32(uint32_t number, int start, int end);
 
 template <typename T, std::size_t N, std::size_t... Is>
 void printArrayHelper(const std::array<T, N> &arr, std::index_sequence<Is...>)
