@@ -68,7 +68,7 @@ void BASE::SIMT_STACK(int warp_id)
         }
         if (emito_simtstk && emitins_warpid == warp_id) // OPC发射的join指令
         {
-            cout << "SM" << sm_id << " warp" << warp_id << " 0x" << std::hex << emit_ins.read().currentpc << std::dec
+            cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << emit_ins.read().currentpc << std::dec
                  << " SIMT_STK receive join ins" << emit_ins << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
             WARPS[warp_id]->vbran_sig = true;
             /*** 以下为分支控制 ***/
