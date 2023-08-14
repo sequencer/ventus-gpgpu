@@ -1,22 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat Aug  5 06:03:57 2023
+[*] Sun Aug 13 15:46:54 2023
 [*]
 [dumpfile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.vcd"
-[dumpfile_mtime] "Sat Aug  5 06:03:12 2023"
-[dumpfile_size] 672272
+[dumpfile_mtime] "Sun Aug 13 14:09:57 2023"
+[dumpfile_size] 516798
 [savefile] "/home/lan/work/ventus-gpgpu/sc-code/sm/BASE_wave_warp0.gtkw"
-[timestart] 1616
-[size] 2350 1266
-[pos] -1 -1
-*-6.000000 605 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 6379
+[size] 2548 1359
+[pos] 35327 32767
+*-4.000000 6465 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] SystemC.
 [treeopen] SystemC.salutmp2.
 [treeopen] SystemC.salutop_dat.
 [sst_width] 214
 [signals_width] 369
 [sst_expanded] 1
-[sst_vpaned_height] 368
+[sst_vpaned_height] 399
 @420
 SystemC.Clk
 SystemC.Rst_n
@@ -87,14 +87,6 @@ SystemC.opcfifo_elem_num[31:0]
 [color] 6
 SystemC.emit_ins.ins_bit[31:0]
 @420
-[color] 6
-SystemC.emit_ins.op[31:0]
-[color] 6
-SystemC.emit_ins.d[31:0]
-[color] 6
-SystemC.emit_ins.s1[31:0]
-[color] 6
-SystemC.emit_ins.s2[31:0]
 [color] 6
 SystemC.emit_idx[31:0]
 @28
