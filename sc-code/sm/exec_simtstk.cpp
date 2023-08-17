@@ -78,6 +78,10 @@ void BASE::SIMT_STACK(int warp_id)
                 readins = emit_ins;
                 if (readins.currentpc == tmpstkelem.rpc)
                 {
+                    cout << "SM" << sm_id << " warp " << warp_id << " 0x" << std::hex << emit_ins.read().currentpc
+                         << " " << emit_ins << "jump=true, jumpTO 0x" << tmpstkelem.nextpc
+                         << ", mask change from " << WARPS[warp_id]->current_mask << " to " << tmpstkelem.nextmask
+                         << std::dec << " at " << sc_time_stamp() << "," << sc_delta_count_at_current_time() << "\n";
                     WARPS[warp_id]->simtstk_jumpaddr = tmpstkelem.nextpc;
                     WARPS[warp_id]->current_mask = tmpstkelem.nextmask;
 

@@ -22,7 +22,9 @@ App=ventus
 all: GPGPU_test
 
 GPGPU_test_FILE=GPGPU_test.cpp BASE.cpp opc.cpp decode.cpp init_decodetable.cpp init_ins.cpp init_instable.cpp initialize.cpp\
- CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp exec.cpp exec_simtstk.cpp
+ CTA_Scheduler.cpp init_extmem.cpp ../parameters.cpp \
+ exec_salu.cpp exec_simtstk.cpp exec_lsu.cpp exec_vfpu.cpp exec_csr.cpp exec_mul.cpp \
+ exec_sfu.cpp exec_valu.cpp
 
 GPGPU_test:
 	$(GCC) -o $(App) $(GPGPU_test_FILE) $(LIB_DIR) $(INC_DIR) $(LIB) -std=c++20
