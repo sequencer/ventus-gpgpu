@@ -28,4 +28,4 @@ gdb ./ventus ./core
 
 To configure systemc, you can refer to my [blog post](https://zhuanlan.zhihu.com/p/638360098) (I also referred to the experience of many others, but this one is more suitable for this project).
 
-The main program is currently in sc-code/sm, run [make -j $(nproc)] to compile the program under the sm folder, and run [./ventus --inssrc imem --metafile matadd/matadd.riscv.meta --datafile matadd/matadd.riscv.data --numcycle 10000] to get the output.
+The main program is currently in sc-code/sm, run [make -j $(nproc) && ./ventus --inssrc imem --metafile matadd/matadd.metadata --datafile matadd/matadd.data --numcycle 10000] to compile the program and get the output under the sm folder.
